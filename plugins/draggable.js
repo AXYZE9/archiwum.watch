@@ -1,5 +1,5 @@
-import DraggableResizableVue from "draggable-resizable-vue";
+import VueDraggableResizable from 'vue-draggable-resizable'
 
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.component("draggable", DraggableResizableVue);
-});
+// export default defineNuxtPlugin((nuxtApp) => {
+//   nuxtApp.vueApp.component("vue-draggable-resizable", VueDraggableResizable);
+// });

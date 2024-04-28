@@ -29,7 +29,6 @@ const chosenStreamer = ref();
                         <p> {{ streamer.name }}</p>
                     </div>
                 </nuxt-link>
-
             </div>
         </div>
 
@@ -37,17 +36,14 @@ const chosenStreamer = ref();
             <br><br><br><br><br><b>Progres</b><br>
             ✔️ Routing<br>
             ✔️ Czat synchronizowany z filmem<br>
-            ⏳ Automatycznie przewijanie czatu i integracja emotek (kod już jest, czeka na poprawe nazw plików z
-            napisami)<br>
+            ✔️ Automatycznie przewijanie czatu i integracja emotek<br>
+            ✔️ Zapamiętywanie ostatnio oglądanego momentu filmu<br>
+            ✔️ Generowanie napisów<br>
+            ⏳ Integracja emotek<br>
             ⏳ Miniaturki i screeny na pasku przewijania (wystarczy wygenerować, kod już jest. Oczekuje na poprawione nazwy
             filmów, ponieważ nazwy plików z miniaturkami są z nimi powiązane)<br>
-            🟡 Zapamiętywanie ostatnio oglądanego momentu filmu (już zbieramy aktualnie wyświetlany czas w propie "duration"
-            przy
-            każdym filmie, który używany jest dla synchronizacji czatu z filmem, trzeba zapisywać to w
-            ciasteczku/localStorage, aby można wznawiać oglądanie)<br>
             🟡 Możliwość lajkowania filmów oraz historia przeglądania (Będzie wykorzystać powyższe
             ciasteczko/localStorage)<br>
-            🟡 Generowanie napisów (aktualnie pisze pipeline pod to)<br>
             🟡 Magiczna wyszukiwarka (Użyjemy MeiliSearch Docs Scraper, ten krok oczekuje na wygenerowane napisy)
             <br>
         </p>

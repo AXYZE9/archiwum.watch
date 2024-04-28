@@ -6,12 +6,112 @@ console.log(chosenStreamer + "/" + chosenVideo)
 const { data: chat } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json");
 
 const instance = getCurrentInstance()
-const duration = ref(null)
+const duration = ref(0)
 const playerx = ref(null)
+import VueDraggableResizable from 'vue-draggable-resizable'
+
+
+import { ref, nextTick, onMounted, onUpdated } from 'vue';
+
+
+// Save progress of movie
+const currentProgress = ref([]); // Array to store progress objects
+const router = useRouter();
+const saveProgress = () => {
+    const url = route.params.name
+    const progress = { url, duration: duration.value };
+
+    // Get current progress from localStorage
+    const storedProgress = localStorage.getItem('current-progress') || '[]';
+    const progressArray = JSON.parse(storedProgress);
+
+    const existingIndex = progressArray.findIndex(item => item.url === url);
+
+
+    if (existingIndex !== -1) {
+        // Update existing object
+        progressArray[existingIndex] = progress;
+    } else {
+        // Add new object for the URL
+        progressArray.push(progress);
+    }
+
+    localStorage.setItem('current-progress', JSON.stringify(progressArray));
+
+    //localStorage.setItem('current-progress', JSON.stringify(progress));
+};
+
+
+
+
+// Scrollable container
+const scrollableContainerRef = ref(null);
+const scrollToBottom = async () => {
+    // Wait for the element to be rendered
+    await nextTick();
+
+
+
+    if (scrollableContainerRef.value) {
+        scrollableContainerRef.value.scrollTo({
+            top: scrollableContainerRef.value.scrollHeight,
+            behavior: 'smooth',
+        });
+    } else {
+        // Handle potential errors (optional)
+        console.warn('Scrollable container element not found.');
+    }
+};
+
+onMounted(() => {
+    // Load progress and set player currentTime
+
+    // const storedProgress = localStorage.getItem('current-progress');
+    // if (storedProgress) {
+    //     const progress = JSON.parse(storedProgress);
+    //     if (progress.url === route.params.name) { // Check for matching URL
+    //         duration.value = progress.duration;
+    //         instance.refs.playerx.player.currentTime = duration.value; // Set player currentTime
+    //     }
+    // }
+
+
+
+
+
+    instance.refs.playerx.player.on('loadeddata', (event) => {
+        const storedProgress = localStorage.getItem('current-progress');
+        if (storedProgress) {
+            const progressArray = JSON.parse(storedProgress);
+            const matchingProgress = progressArray.find(item => item.url === route.params.name);
+
+            if (matchingProgress) {
+                duration.value = matchingProgress.duration;
+                instance.refs.playerx.player.currentTime = duration.value;
+            }
+        }
+    });
+
+    window.onbeforeunload = (event) => {
+        saveProgress();
+        return null; // Optional: prevent default message (use with caution)
+    };
+
+
+});
+
+onUpdated(scrollToBottom); // Scroll on content updates
+onBeforeUnmount(saveProgress);
+
+
+
+
+
 
 
 function videoTimeUpdated() {
     playerx.value = instance.refs.playerx.player
+
     duration.value = playerx.value.currentTime
     // console.log(duration.value)
     // console.log(chat.value.comments)
@@ -21,17 +121,15 @@ function videoTimeUpdated() {
 }
 
 const filteredComments = computed(() => {
-    return chat.value.comments.filter(comment => comment.content_offset_seconds < duration.value)
+    return chat.value.comments.filter(comment => comment.content_offset_seconds < duration.value).slice(-30)
 })
 
 </script>
 
 <template>
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
-
-
         <p class="text-white">
-            Duration: {{ duration }}
+            [DEBUG] Progress oglądania: {{ duration }}
         </p>
         <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx">
             <video :emit="['timeupdate']" controls crossorigin playsinline data-poster="poster.jpg">
@@ -43,9 +141,9 @@ const filteredComments = computed(() => {
 
 
 
-        <draggable :min-width="240" :min-height="160" :max-width="480" :max-height="960"
-            class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex">
-            <div class="text-xs text-white w-full overflow-y-scroll">
+        <VueDraggableResizable :min-width="320" :max-width="480" :min-height="240" :max-height="720"
+            class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container">
+            <div class="text-xs text-white w-full overflow-y-scroll" ref="scrollableContainerRef">
                 <br> Tutaj będzie wyświetlany czat! 😊
                 <br> Pociągając za krawędź możesz zmienić rozmiar czatu
                 <br> Przeciągając ten element możesz zmienić jego położenie
@@ -66,7 +164,7 @@ const filteredComments = computed(() => {
 
             </div>
 
-        </draggable>
+        </VueDraggableResizable>
 
 
         <div
@@ -122,3 +220,7 @@ const filteredComments = computed(() => {
         </div>
     </div>
 </template>
+
+<style>
+@import "vue-draggable-resizable/style.css";
+</style>
