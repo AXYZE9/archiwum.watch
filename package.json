@@ -17,7 +17,7 @@
     "nuxt-icon": "^0.5.0"
   },
   "dependencies": {
-    "@skjnldsv/vue-plyr": "^7.3.1",
-    "draggable-resizable-vue3": "^1.0.94-beta"
+    "@skjnldsv/vue-plyr": "^7.4.0",
+    "vue-draggable-resizable": "^3.0.0"
   }
 }
