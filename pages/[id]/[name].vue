@@ -128,21 +128,15 @@ const filteredComments = computed(() => {
 
 <template>
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
+
         <p class="text-white">
             [DEBUG] Progress oglądania: {{ duration }}
         </p>
-        <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx">
-            <video :emit="['timeupdate']" controls crossorigin playsinline data-poster="poster.jpg">
-                <source :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".mp4"'
-                    type="video/mp4" />
-                <track default kind="captions" label="Polskie napisy" src="media/stream.vtt" srclang="pl" />
-            </video>
-        </vue-plyr>
-
 
 
         <VueDraggableResizable :min-width="320" :max-width="480" :min-height="240" :max-height="720"
-            class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container">
+            class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container"
+            style="z-index:1">
             <div class="text-xs text-white w-full overflow-y-scroll" ref="scrollableContainerRef">
                 <br> Tutaj będzie wyświetlany czat! 😊
                 <br> Pociągając za krawędź możesz zmienić rozmiar czatu
@@ -160,11 +154,21 @@ const filteredComments = computed(() => {
                         <p>{{ comment.message.body }}</p>
                     </div>
                 </div>
-
-
             </div>
 
         </VueDraggableResizable>
+
+        <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx" class="z-20">
+            <video :emit="['timeupdate']" controls crossorigin playsinline>
+                <source :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".mp4"'
+                    type="video/mp4" />
+                <track default kind="captions" label="Polskie napisy (AI)"
+                    :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".vtt"' srclang="pl" />
+            </video>
+        </vue-plyr>
+
+
+
 
 
         <div

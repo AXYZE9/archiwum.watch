@@ -4,7 +4,7 @@
             <nuxt-link to="/">
                 <div class=" border-r border-yellow-500 px-3 py-1 hover:text-yellow-800 transition">
                     <h1 class="italic font-extrabold text-xl leading-none">Archiwum</h1>
-                    <h2 class="leading-none">.stream</h2>
+                    <h2 class="leading-none">.watch</h2>
                 </div>
             </nuxt-link>
             <div class="flex gap-6 mx-6 ">
