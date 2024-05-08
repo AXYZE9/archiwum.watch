@@ -1,5 +1,5 @@
 <template>
-    <div class="flex gap-4 mx-auto max-w-screen-xl px-2 my-4">
+    <div class="flex gap-4 mx-auto max-w-screen-xl px-2 my-4 z-20 relative">
         <div class="bg-yellow-400 rounded-2xl p-2 flex items-center">
             <nuxt-link to="/">
                 <div class=" border-r border-yellow-500 px-3 py-1 hover:text-yellow-800 transition">
@@ -20,7 +20,7 @@
             <div class="mx-6 flex items-center">
                 <Icon name="material-symbols:search" size="28px" class="text-purple-400 "></Icon>
                 <div class="mx-3 text-purple-400 hidden md:block">
-                    <p class="leading-none">Magiczna wyszukiwarka</p>
+                    <p class="leading-none">Magiczna wyszukiwarka (PLACEHOLDER)</p>
                     <p class="leading-none text-xs">Czat, wypowiedziane słowa, tagi...</p>
                 </div>
             </div>

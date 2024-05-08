@@ -1,7 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: false,
-  devtools: { enabled: true },
+  routeRules: {
+    '/':  { ssr: false },
+    '/crawler':  { ssr: true },
+    '/crawler/**':  { ssr: true },
+  },
+  devtools: { enabled: false },
   modules: [
     '@nuxtjs/tailwindcss',
     'nuxt-icon',

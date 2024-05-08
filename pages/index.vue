@@ -36,14 +36,13 @@ const chosenStreamer = ref();
             <br><br><br><br><br><b>Progres</b><br>
             ✔️ Routing<br>
             ✔️ Czat synchronizowany z filmem<br>
-            ✔️ Automatycznie przewijanie czatu i integracja emotek<br>
+            ✔️ Automatycznie przewijanie czatu<br>
             ✔️ Zapamiętywanie ostatnio oglądanego momentu filmu<br>
-            ✔️ Generowanie napisów<br>
-            ⏳ Integracja emotek<br>
-            ⏳ Miniaturki i screeny na pasku przewijania (wystarczy wygenerować, kod już jest. Oczekuje na poprawione nazwy
+            ⏳ Generowanie napisów (aktualny stan na Discord)<br>
+            🟡 Miniaturki i screeny na pasku przewijania (Oczekuje na poprawione
+            nazwy
             filmów, ponieważ nazwy plików z miniaturkami są z nimi powiązane)<br>
-            🟡 Możliwość lajkowania filmów oraz historia przeglądania (Będzie wykorzystać powyższe
-            ciasteczko/localStorage)<br>
+            🟡 Możliwość lajkowania filmów oraz historia przeglądania (LocalStorage)<br>
             🟡 Magiczna wyszukiwarka (Użyjemy MeiliSearch Docs Scraper, ten krok oczekuje na wygenerowane napisy)
             <br>
         </p>
@@ -74,7 +73,7 @@ const chosenStreamer = ref();
     height: 100%;
     filter: blur(2px) brightness(0.2);
     z-index: -2;
-    animation: fadeInAnimation ease 3s;
+    animation: fadeInAnimation ease 1s;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
 }
@@ -110,7 +109,7 @@ const chosenStreamer = ref();
         opacity: 0;
     }
 
-    50% {
+    20% {
         opacity: 0;
     }
 
