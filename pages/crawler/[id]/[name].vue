@@ -38,9 +38,11 @@ loadCaptions("https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosen
 </script>
 
 <template>
-    <div class="text-neutral-400 mx-auto max-w-screen-xl ">
+    <div class="text-neutral-400 mx-auto max-w-screen-xl crawlerVideoPage">
         <div class="py-4 mb-4">
-            <h1 class="text-xl font-bold text-yellow-400 crawlerStreamStreamer">{{ chosenStreamer }}</h1>
+            <h1 class="text-xl font-bold text-yellow-400 crawlerStreamStreamer">
+                <p>{{ chosenStreamer }}</p>
+            </h1>
             <p class="crawlerStreamNameWithoutDate">{{ chosenVideo.substring(11) }}</p>
             <p class="crawlerStreamNameWithDate">{{ chosenVideo }}</p>
 

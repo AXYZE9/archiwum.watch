@@ -1,17 +1,15 @@
 <script setup>
 const { data: streamerList } = await useFetch('https://cdn1.fivecity.watch/test/');
+const chosenStreamer = ref();
 </script>
 
 <template>
     <div class="main">
-        <h1 class="titlex">Archiwum Fivecity.Watch</h1>
-        <h2 class="crawlerStreamerName">
-            <NuxtLink class="flex text-yellow-400 py-1 streamerName" v-for="streamer in streamerList"
+        <h1 class="streamerList">Lista streamerów</h1>
+        <h2 class="crawlerStreamerName"><a class="flex text-yellow-400 py-1" v-for="streamer in streamerList"
                 :href='"crawler/" + streamer.name'>
                 {{ streamer.name }}
-
-            </NuxtLink>
-        </h2>
+            </a></h2>
 
     </div>
 </template>

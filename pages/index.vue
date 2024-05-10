@@ -39,11 +39,9 @@ const chosenStreamer = ref();
             ✔️ Automatycznie przewijanie czatu<br>
             ✔️ Zapamiętywanie ostatnio oglądanego momentu filmu<br>
             ⏳ Generowanie napisów (aktualny stan na Discord)<br>
-            🟡 Miniaturki i screeny na pasku przewijania (Oczekuje na poprawione
-            nazwy
-            filmów, ponieważ nazwy plików z miniaturkami są z nimi powiązane)<br>
+            ⏳ Miniaturki i screeny na pasku przewijania<br>
+            ⏳ Magiczna wyszukiwarka (Użyjemy MeiliSearch Docs Scraper, ten krok oczekuje na wygenerowane napisy)
             🟡 Możliwość lajkowania filmów oraz historia przeglądania (LocalStorage)<br>
-            🟡 Magiczna wyszukiwarka (Użyjemy MeiliSearch Docs Scraper, ten krok oczekuje na wygenerowane napisy)
             <br>
         </p>
 
