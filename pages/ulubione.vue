@@ -1,39 +1,6 @@
 <script setup>
-const route = useRoute();
-const chosenCreatorName = route.params.id;
-// console.log(chosenCreatorName)
-const { data: chosenStreamerStreams } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenCreatorName);
 
-// Get just mp4 files from object array that has variety of extensions
-const filteredVideos = computed(() => {
-    return chosenStreamerStreams.value.filter(object => object.name.includes("mp4"));
-})
-
-console.log(filteredVideos);
-
-filteredVideos.value.reverse();
-// Check if captions file (filename.vtt) exists
-
-function getCaptionName(streamName) {
-    const baseName = streamName.slice(0, -4);
-    return `${baseName}.vtt`;
-}
-
-function hasCaptions(streamName) {
-    const captionName = getCaptionName(streamName);
-    return chosenStreamerStreams.value.some(stream => stream.name === captionName);
-}
-
-// Check if chat file (filename - Chat.json.gz) exists
-function getChatName(streamName) {
-    const baseName = streamName.slice(0, -4);
-    return `${baseName} - Chat.json.gz`;
-}
-
-function hasChat(streamName) {
-    const chatName = getChatName(streamName);
-    return chosenStreamerStreams.value.some(stream => stream.name === chatName);
-}
+const likedVideos = ref([]);
 
 // Interactive bubbles
 const interactiveElement = ref(null);
@@ -53,6 +20,7 @@ function animate() {
 
 
 onMounted(() => {
+    likedVideos.value = loadLikedVideos();
     interactiveElement.value = document.querySelector(".interactive");
     window.addEventListener("mousemove", handleMouseMove);
     animate();
@@ -62,32 +30,12 @@ onBeforeUnmount(() => {
     window.removeEventListener("mousemove", handleMouseMove);
 });
 
-const pageSize = 12;
-const currentPage = ref(1);
-const paginatedVideos = computed(() => {
-    const start = (currentPage.value - 1) * pageSize;
-    return filteredVideos.value.slice(start, start + pageSize);
-});
+const loadLikedVideos = () => {
+    const storedVideos = localStorage.getItem('likedVideos');
+    return storedVideos ? JSON.parse(storedVideos) : [];
+};
 
-const isNextPage = computed(() => {
-    return (currentPage.value * pageSize) < filteredVideos.value.length;
-});
 
-const isPreviousPage = computed(() => {
-    return currentPage.value > 1;
-});
-
-function nextPage() {
-    if ((currentPage.value * pageSize) < filteredVideos.value.length) {
-        currentPage.value++;
-    }
-}
-
-function previousPage() {
-    if (isPreviousPage.value) {
-        currentPage.value--;
-    }
-}
 </script>
 
 <template>
@@ -104,62 +52,28 @@ function previousPage() {
         </div>
 
         <div class="text-white flex gap-6 flex-wrap justify-center mx-auto max-w-screen-xl">
-            <div v-for='stream in paginatedVideos' class="flex zoomOnHover" :key="stream.name">
-                <nuxt-link :to="chosenCreatorName + '/' + stream.name.slice(0, -4)" class="videoCard border border-purple-900 rounded-xl
+            <div v-for='video in likedVideos' class="flex zoomOnHover" :key="video.id">
+
+                <nuxt-link :to="video.id + '/' + video.name" class="videoCard border border-purple-900 rounded-xl
                     shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0px_0px_70px_rgba(59,7,100,0.7)]
                     hover:border-yellow-400 hover:bg-stone-800 hover:shadow-yellow-900
                     transition overflow-hidden
                     w-96 max-w-lg flex-grow videoAnimation
         ">
-                    <div class="flex gap-2 mt-2 ml-2 absolute">
-                        <span v-if="hasCaptions(stream.name)"
-                            class="px-2 py-1 bg-purple-800 rounded-full text-xs">Napisy
-                            AI</span>
-                        <span v-if="hasChat(stream.name)" class="px-2 bg-purple-800 rounded-full text-xs py-1">Zapis
-                            czatu</span>
-                    </div>
                     <img loading="lazy"
-                        :src="'https://cdn1.fivecity.watch/test/' + chosenCreatorName + '/' + stream.name.slice(0, -4) + '.jpg'"
-                        :alt="'Screenshot' + stream.name.slice(0, -4)">
+                        :src="'https://cdn1.fivecity.watch/test/' + video.id + '/' + video.name + '.jpg'"
+                        :alt="'Screenshot' + video.name">
                     <div class="px-4 py-4">
 
-                        <p class="font-bold text-yellow-400"> {{ stream.name.slice(7, 9) }}.{{
-                            stream.name.slice(4, 6) }}.20{{ stream.name.slice(1, 3) }}</p>
-                        <p class="">{{ stream.name.substring(stream.name.indexOf('- ') + 1).slice(0, -4) }}</p>
-
-
+                        <p class="font-bold text-yellow-400"> {{ video.name.slice(7, 9) }}.{{
+                            video.name.slice(4, 6) }}.20{{ video.name.slice(1, 3) }}</p>
+                        <p class="">{{ video.name.substring(11) }}</p>
                     </div>
 
                 </nuxt-link>
 
             </div>
-
         </div>
-        <div class="z-10 relative flex justify-around mt-12 gap-6">
-            <button v-if="isPreviousPage" @click="previousPage" class="border-t border-neutral-700 bg-neutral-600 bg-opacity-10 md:flex-grow=0 px-4 py-2 gap-2 rounded-xl
-                flex items-center justify-center text-neutral-200 hover:text-yellow-300 transition 
-                outline-yellow-900 hover:bg-orange-900 hover:bg-opacity-20 hover:border-yellow-400
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(166,168,33,0.2)]
-                hover:outline-1">
-                <Icon name="fluent:previous-20-filled" size="20px" class="">
-                </Icon>
-                <p>Poprzednia strona</p>
-            </button>
-
-            <button v-if="isNextPage" @click="nextPage" class="border-t border-neutral-700 bg-neutral-600 bg-opacity-10 md:flex-grow=0 px-4 py-2 gap-2 rounded-xl
-                flex items-center justify-center text-neutral-200 hover:text-yellow-300 transition 
-                outline-yellow-900 hover:bg-orange-900 hover:bg-opacity-20 hover:border-yellow-400
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(166,168,33,0.2)]
-                hover:outline-1">
-                <Icon name="fluent:next-20-filled" size="20px" class="">
-                </Icon>
-                <p>Następna strona</p>
-            </button>
-
-        </div>
-
 
     </div>
 </template>

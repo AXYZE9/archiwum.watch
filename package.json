@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@nuxtjs/algolia": "^1.10.2",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "^6.12.0",
     "nuxt": "^3.11.2",
@@ -18,7 +19,8 @@
   },
   "dependencies": {
     "@skjnldsv/vue-plyr": "^7.4.0",
-    "nuxt-meilisearch": "^1.1.0",
-    "vue-draggable-resizable": "^3.0.0"
+    "sqlite3": "^5.1.7",
+    "vue-draggable-resizable": "^3.0.0",
+    "vue-instantsearch": "^4.19.1"
   }
 }

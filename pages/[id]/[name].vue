@@ -8,11 +8,15 @@ const { data: chat } = await useFetch('https://cdn1.fivecity.watch/test/' + chos
 const instance = getCurrentInstance()
 const duration = ref(0)
 const playerx = ref(null)
+const showModal = ref(false);
+const modalMessage = ref('');
 import VueDraggableResizable from 'vue-draggable-resizable'
 
 
 import { ref, nextTick, onMounted, onUpdated } from 'vue';
 
+//Polubienia
+const likedVideos = ref([]);
 
 // Save progress of movie
 const currentProgress = ref([]); // Array to store progress objects
@@ -64,7 +68,6 @@ const scrollToBottom = async () => {
 };
 
 onMounted(() => {
-
     instance.refs.playerx.player.on('loadeddata', (event) => {
         const storedProgress = localStorage.getItem('current-progress');
         if (storedProgress) {
@@ -77,6 +80,8 @@ onMounted(() => {
             }
         }
     });
+
+    loadLikedVideos();
 
     window.onbeforeunload = (event) => {
         saveProgress();
@@ -124,20 +129,49 @@ function handleClickChapter(chapterino) {
 
 fetchChapters();
 
+const likeVideo = () => {
+    const newVideo = { id: chosenStreamer, name: chosenVideo };
+    const likedVideos = loadLikedVideos();
+
+    if (!likedVideos.some(video => video.id === newVideo.id && video.name === newVideo.name)) {
+        likedVideos.push(newVideo);
+        saveLikedVideos(likedVideos);
+
+        // Success message
+        showModal.value = true;
+        modalMessage.value = 'Polubiono film! 🥰';
+
+        setTimeout(() => {
+            showModal.value = false;
+        }, 3000);
+
+    } else {
+        // Already liked message
+        showModal.value = true;
+        modalMessage.value = 'Już polubiono ten film 🤷';
+
+        setTimeout(() => {
+            showModal.value = false;
+        }, 3000);
+    }
+};
+
+const saveLikedVideos = (videos) => {
+    localStorage.setItem('likedVideos', JSON.stringify(videos));
+};
+
+const loadLikedVideos = () => {
+    const storedVideos = localStorage.getItem('likedVideos');
+    return storedVideos ? JSON.parse(storedVideos) : [];
+};
+
 </script>
 
 <template>
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
-
-        <p class="text-yellow-800">
-            [DEBUG] Progress oglądania: {{ duration }}
-        </p>
-
-
-
         <VueDraggableResizable :w="280" :h="160" :min-width="240" :max-width="480" :min-height="80" :max-height="720"
             class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container"
-            style="z-index:1;position:fixed;">
+            style="z-index:20;position:fixed;">
             <div class="text-xs text-white w-full overflow-y-scroll" style="touch-action: none;"
                 ref="scrollableContainerRef">
                 <br> Tutaj będzie wyświetlany czat! 😊
@@ -174,21 +208,38 @@ fetchChapters();
 
 
 
+        <div v-if="chat.video.chapters[0].gameBoxArtUrl !== null"
+            class="flex mt-6 flex-row gap-2 justify-center text-white">
+            <div class="flex flex-row items-center border border-neutral-800 rounded-xl overflow-hidden">
+                <img :src="chat.video.chapters[0].gameBoxArtUrl">
+                <p class="px-2">{{ chat.video.chapters[0].gameDisplayName }}</p>
+            </div>
 
+        </div>
 
 
         <div
             class="flex bg-neutral-900 px-6 py-6 mt-6 rounded-2xl flex border-t border-neutral-800 shadow-xl flex-grow flex-wrap gap-6">
-            <div class="flex items-center flex-grow ">
+            <div class="flex items-center flex-grow flex-wrap justify-center">
                 <NuxtLink :to="'../' + chosenStreamer"><img
-                        src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Jinnytty_Dec_22%2C_2020_002.jpg"
+                        :src='"https://cdn1.fivecity.watch/avatar/" + chosenStreamer + ".jpg"'
                         class="w-32 h-32 rounded-full mr-3"></NuxtLink>
                 <div class="flex-grow">
                     <NuxtLink :to="'../' + chosenStreamer">
                         <h1 class="text-xl font-bold underline text-yellow-400">{{ chosenStreamer }}</h1>
                     </NuxtLink>
+                    <p>Streamowano: {{ chosenVideo.slice(7, 9) }}.{{ chosenVideo.slice(4, 6) }}.20{{
+                        chosenVideo.slice(1, 3) }}
+                    </p>
+                    <p>Tytuł Archiwum.Watch: {{
+                        chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2) }}</p>
+                    <div
+                        v-if="chat.video !== null && chat.video.title !== chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2)">
+                        <p>Tytuł oryginalny: {{ chat.video.title }}</p>
+                    </div>
 
-                    <p>{{ chosenVideo.substring(11).split(/-(?=.*\-)/)[1] }}</p>
+                    <div></div>
+
                     <div v-if="chapters !== null" v-for="chapter in chapters" :key="chapter.id"
                         class="flex gap-3 flex-wrap mt-4">
 
@@ -208,25 +259,60 @@ fetchChapters();
 
 
             </div>
-            <div class="flex gap-3 md:ml-4 justify-end flex-grow items-center flex-wrap md:gap-6">
+            <div class="flex gap-1 flex-grow-0 md:ml-2 justify-end flex-grow items-center flex-wrap md:gap-3">
 
-                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-purple-400 transition 
-                outline-purple-900 hover:bg-purple-900 hover:bg-opacity-20 hover:border-purple-600
+                <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
+                outline-yellow-900 hover:bg-yellow-900 hover:bg-opacity-20 hover:border-yellow-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(107,33,168,0.4)]
-                hover:outline-1
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(255,215,0,0.2)]
+                hover:outline-1 cursor-pointer
                 ">
                     <Icon name="material-symbols:favorite" size="32px" class="">
                     </Icon>
                     <p class="text-sm mt-2">Polub</p>
                 </div>
-                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-40 md:flex-grow=0 h-24 rounded-xl
+                <transition name="slide-up">
+                    <div class="fixed py-2 bottom-10 px-2 z-30 w-screen left-0 flex justify-center" v-if="showModal">
+                        <div class="absolute -bottom-12 -rotate-6 px-2 z-20 w-screen flex justify-center">
+                            <p class="w-48 justify-end flex h-48 items-center serduszko mr-96">
+                                <Icon name="fluent-emoji-flat:red-heart" size="120px" class="text-purple-400" />
+                            </p>
+                        </div>
+                        <div class="absolute -bottom-12 rotate-6 px-2 z-20 w-screen flex justify-center">
+                            <p class="w-48 justify-start flex h-48 items-center serduszko ml-96">
+                                <Icon name="fluent-emoji-flat:red-heart" size="96px" class="text-purple-400" />
+                            </p>
+                        </div>
+                        <p
+                            class="text-white bg-neutral-800 z-30 rounded-xl px-4 py-2 border-t-neutral-600 border-b-neutrl-900 border border-transparent shadow-2xl shadow-red-900">
+
+                            {{
+                                modalMessage }}
+                        </p>
+                    </div>
+                </transition>
+
+                <a :href="'https://cdn1.fivecity.watch/test/' + chosenStreamer + '/' + chosenVideo + '.mp4'" download>
+                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-blue-400 transition 
+                outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,107,168,0.4)]
+                hover:outline-1 cursor-pointer
+                ">
+                        <Icon name="material-symbols:download" size="32px" class="">
+                        </Icon>
+                        <p class="text-sm mt-2">Pobierz</p>
+                    </div>
+                </a>
+
+                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
                 flex flex-col items-center justify-center text-neutral-600 hover:text-purple-400 transition 
                 outline-purple-900 hover:bg-purple-900 hover:bg-opacity-20 hover:border-purple-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
                 outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(107,33,168,0.4)]
-                hover:outline-1
+                hover:outline-1 cursor-pointer
                 ">
                     <Icon name="material-symbols:auto-fix" size="32px" class="">
                     </Icon>
@@ -241,6 +327,26 @@ fetchChapters();
 
 <style>
 @import "vue-draggable-resizable/style.css";
+
+.serduszko {
+    background: radial-gradient(circle, #f31e1e4d, #db1c1500 65%);
+}
+
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: transform 0.3s ease-in-out;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+    transform: translateY(100%);
+}
+
+.slide-up-enter-to,
+.slide-up-leave-from {
+    transform: translateY(0);
+}
 
 @media screen and (max-width: 460px) {
     .plyr__volume {
