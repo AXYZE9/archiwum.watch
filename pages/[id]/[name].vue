@@ -2,7 +2,7 @@
 const route = useRoute();
 const chosenStreamer = route.params.id;
 const chosenVideo = route.params.name;
-console.log(chosenStreamer + "/" + chosenVideo)
+// console.log(chosenStreamer + "/" + chosenVideo)
 const { data: chat } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json");
 
 const instance = getCurrentInstance()
@@ -169,14 +169,15 @@ const loadLikedVideos = () => {
 
 <template>
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
-        <VueDraggableResizable :w="280" :h="160" :min-width="240" :max-width="480" :min-height="80" :max-height="720"
+        <VueDraggableResizable :w="300" :h="320" :min-width="240" :max-width="480" :min-height="80" :max-height="720"
             class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container"
             style="z-index:20;position:fixed;">
-            <div class="text-xs text-white w-full overflow-y-scroll" style="touch-action: none;"
+            <div class="text-xs text-white w-full overflow-y-scroll"
+                style="touch-action: none;    scrollbar-color: #9037e9 rgb(255 255 255 / 5%);"
                 ref="scrollableContainerRef">
                 <br> Tutaj będzie wyświetlany czat! 😊
-                <br> Pociągając za krawędź możesz zmienić rozmiar czatu
-                <br> Przeciągając ten element możesz zmienić jego położenie
+                <br> ↔ Pociągając za krawędź możesz zmienić rozmiar czatu
+                <br> ☝️ Przeciągając ten element możesz zmienić jego położenie
                 <br>
                 <br>
                 <br>
@@ -228,14 +229,14 @@ const loadLikedVideos = () => {
                     <NuxtLink :to="'../' + chosenStreamer">
                         <h1 class="text-xl font-bold underline text-yellow-400">{{ chosenStreamer }}</h1>
                     </NuxtLink>
-                    <p>Streamowano: {{ chosenVideo.slice(7, 9) }}.{{ chosenVideo.slice(4, 6) }}.20{{
+                    <p><sub>STREAMOWANO</sub><br> {{ chosenVideo.slice(7, 9) }}.{{ chosenVideo.slice(4, 6) }}.20{{
                         chosenVideo.slice(1, 3) }}
                     </p>
-                    <p>Tytuł Archiwum.Watch: {{
+                    <p><sub>TYTUŁ ARCHIWUM.WATCH</sub><br> {{
                         chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2) }}</p>
                     <div
                         v-if="chat.video !== null && chat.video.title !== chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2)">
-                        <p>Tytuł oryginalny: {{ chat.video.title }}</p>
+                        <p><sub>TYTUŁ ORYGINALNY</sub><br> {{ chat.video.title }}</p>
                     </div>
 
                     <div></div>
@@ -327,6 +328,22 @@ const loadLikedVideos = () => {
 
 <style>
 @import "vue-draggable-resizable/style.css";
+
+
+.plyr--full-ui input[type=range] {
+    color: #facc15;
+}
+
+.plyr__control--overlaid {
+    background: rgba(#facc15, .5);
+}
+
+
+.plyr--video .plyr__control.plyr__tab-focus,
+.plyr--video .plyr__control:hover,
+.plyr--video .plyr__control[aria-expanded=true] {
+    background: #9037e9;
+}
 
 .serduszko {
     background: radial-gradient(circle, #f31e1e4d, #db1c1500 65%);

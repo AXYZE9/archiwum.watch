@@ -9,7 +9,7 @@ const filteredVideos = computed(() => {
     return chosenStreamerStreams.value.filter(object => object.name.includes("mp4"));
 })
 
-console.log(filteredVideos);
+// console.log(filteredVideos);
 
 filteredVideos.value.reverse();
 // Check if captions file (filename.vtt) exists

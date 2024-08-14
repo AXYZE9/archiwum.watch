@@ -45,6 +45,7 @@ const chosenStreamer = ref();
         drop-shadow(0px 0px 0px rgba(0, 0, 0, 0)) saturate(0);
     border-radius: 10px;
     overflow: hidden;
+
 }
 
 .card-effect>a:hover {

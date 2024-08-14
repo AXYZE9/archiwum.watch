@@ -1,75 +1,15 @@
-# Nuxt 3 Minimal Starter
+# Archiwum.Watch
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Kod frontendu Archiwum.Watch.
 
-## Setup
+## Stack frontendu
+Vue3 + Nuxt3
+Używamy Nuxt3 z uwagi na możliwość generowania stron statycznych oraz dodatków takich jak routing czy autoimport.
 
-Make sure to install the dependencies:
+## Jak działa backend/API?
+Nginx - zwraca obiekty JSON (lista streamerów, lista filmów danego streamera), które są następnie przetwarzane przez frontend.
+FFMPEG - generuje miniatury filmów.
+WhisperS2T - generuje napisy do filmów.
 
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Kontakt
+archiwumwatch@zalecane.pl

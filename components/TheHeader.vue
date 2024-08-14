@@ -68,10 +68,10 @@ onUnmounted(() => {
                     <template v-slot="{ items }">
                         <div v-for="item in items" :key="item.objectID" class="overflow-hidden px-2 hover:bg-purple-700/80 transition text-neutral-200 hover:text-white
                             searchitem">
-                            <NuxtLink @click="showHits = false" :href="'/' + indexName + '/' + item.filename"
+                            <NuxtLink @click="showHits = false" :href="'/' + item.streamer_name + '/' + item.filename"
                                 class="flex gap-2 items-center">
                                 <div class="shrink-0 img-overlay">
-                                    <img :src="'https://cdn1.fivecity.watch/test/' + indexName + '/' + item.filename + '.jpg'"
+                                    <img :src="'https://cdn1.fivecity.watch/test/' + item.streamer_name + '/' + item.filename + '.jpg'"
                                         class="h-12 md:h-20"></img>
                                 </div>
 
