@@ -2,9 +2,14 @@
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
+            <h2 class="text-white text-bold">v2.0 (15.08.2024)</h2>
+            <p>✅ Dodano paginacje do wyników wyszukiwania</p>
+            <p>✅ Małe optymalizacje ładowania podstron</p>
+        </div>
+        <div class="py-2">
             <h2 class="text-white text-bold">v2.0 (14.08.2024)</h2>
             <p>Strona została napisana zupełnie od nowa w Vue3(Nuxt3)</p>
-            <p>Otworzyliśmy <a href="https://github.com/AXYZE9/fivecity.watch" class="text-purple-400 underline">kod
+            <p>Otworzyliśmy <a href="https://github.com/AXYZE9/archiwum.watch" class="text-purple-400 underline">kod
                     źródłowy (GitHub)</a></p>
             <p>✅ Magiczna wyszukiwarka</p>
             <p>✅ Wygenerowane napisy AI</p>

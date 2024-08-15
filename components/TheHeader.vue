@@ -1,7 +1,7 @@
 <script setup>
 const indexName = 'Buli'
 const algolia = useAlgoliaRef()
-import { AisInstantSearch, AisSearchBox, AisHits, AisHighlight } from 'vue-instantsearch/vue3/es'
+import { AisInstantSearch, AisSearchBox, AisHits, AisHighlight, AisPagination } from 'vue-instantsearch/vue3/es'
 
 const showHits = ref(false);
 
@@ -63,34 +63,43 @@ onUnmounted(() => {
 
 
             <transition name="slide">
-                <ais-hits v-if="showHits" @click.stop
-                    class="flex flex-col backdrop-blur-lg bg-black/50 rounded-2xl border border-purple-400/30 overflow-hidden -ml-2 md:ml-0">
-                    <template v-slot="{ items }">
-                        <div v-for="item in items" :key="item.objectID" class="overflow-hidden px-2 hover:bg-purple-700/80 transition text-neutral-200 hover:text-white
+                <div class="absolute ais-Box" v-if="showHits" @click.stop>
+                    <ais-hits :hits-per-page="2"
+                        class="flex flex-col backdrop-blur-lg bg-black/50 rounded-2xl border border-purple-400/30 overflow-hidden -ml-2 md:ml-0">
+                        <template v-slot="{ items }">
+                            <div v-for="item in items" :key="item.objectID" class="overflow-hidden px-2 hover:bg-purple-700/80 transition text-neutral-200 hover:text-white
                             searchitem">
-                            <NuxtLink @click="showHits = false" :href="'/' + item.streamer_name + '/' + item.filename"
-                                class="flex gap-2 items-center">
-                                <div class="shrink-0 img-overlay">
-                                    <img :src="'https://cdn1.fivecity.watch/test/' + item.streamer_name + '/' + item.filename + '.jpg'"
-                                        class="h-12 md:h-20"></img>
-                                </div>
+                                <NuxtLink @click="showHits = false"
+                                    :href="'/' + item.streamer_name + '/' + item.filename"
+                                    class="flex gap-2 items-center">
+                                    <div class="shrink-0 img-overlay">
+                                        <img :src="'https://cdn1.fivecity.watch/test/' + item.streamer_name + '/' + item.filename + '.jpg'"
+                                            class="h-12 md:h-20"></img>
+                                    </div>
 
-                                <div class="py-3 md:py-6">
-                                    <p class="font-bold text-xs">
-                                        <ais-highlight attribute="filename" :hit="item" />
-                                    </p>
-                                    <p class="text-neutral-400 text-xs left-2  rounded-md">
-                                        🕒 {{ item.start_time.slice(0, -4) }} - {{ item.end_time.slice(0, -4) }}
-                                    </p>
-                                    <p class="text-xs">
-                                        <ais-highlight attribute="content" :hit="item" />
-                                    </p>
-                                </div>
-                            </NuxtLink>
-                        </div>
-                    </template>
-                </ais-hits>
+                                    <div class="py-3 md:py-6">
+                                        <p class="font-bold text-xs">
+                                            <ais-highlight attribute="filename" :hit="item" />
+                                        </p>
+                                        <p class="text-neutral-400 text-xs left-2  rounded-md">
+                                            🕒 {{ item.start_time.slice(0, -4) }} - {{ item.end_time.slice(0, -4) }}
+                                        </p>
+                                        <p class="text-xs">
+                                            <ais-highlight attribute="content" :hit="item" />
+                                        </p>
+                                    </div>
+                                </NuxtLink>
+                            </div>
+                        </template>
+
+                    </ais-hits>
+                    <ais-pagination :total-pages="10" :padding="1" class="transition" :showNext="false"
+                        :showPrevious="false" />
+                </div>
+
+
             </transition>
+
         </ais-instant-search>
 
 
@@ -98,6 +107,42 @@ onUnmounted(() => {
 </template>
 
 <style>
+.ais-Pagination {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.ais-Pagination-list {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    background: radial-gradient(#3e1d8ca3 10%, transparent 70%);
+    height: 80px;
+}
+
+.ais-Pagination-item {
+    margin: 0 0.5rem;
+}
+
+.ais-Pagination-link {
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    background-color: rgb(139 92 246 / 24%);
+    transition: background-color 0.3s ease;
+    border: 1px solid #8b5cf62b;
+}
+
+.ais-Pagination-item--selected .ais-Pagination-link {
+    background-color: rgb(139, 92, 246);
+    border-top: 1px solid #a98ee5;
+}
+
+.ais-Pagination-link:hover {
+    background-color: rgba(139, 92, 246, 0.7);
+}
+
 .searchitem img {
     transition: 0.15s ease-out;
     mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 1) 90%);
@@ -131,7 +176,7 @@ onUnmounted(() => {
     width: 100%;
 }
 
-.ais-Hits {
+.ais-Box {
     position: absolute;
     margin-top: 80px;
 }

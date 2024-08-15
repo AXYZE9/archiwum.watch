@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@skjnldsv/vue-plyr": "^7.4.0",
-    "sqlite3": "^5.1.7",
     "vue-draggable-resizable": "^3.0.0",
     "vue-instantsearch": "^4.19.1"
   }

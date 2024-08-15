@@ -2,7 +2,6 @@
 const route = useRoute();
 const chosenStreamer = route.params.id;
 const chosenVideo = route.params.name;
-// console.log(chosenStreamer + "/" + chosenVideo)
 const { data: chat } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json");
 
 const instance = getCurrentInstance()
@@ -41,8 +40,6 @@ const saveProgress = () => {
     }
 
     localStorage.setItem('current-progress', JSON.stringify(progressArray));
-
-    //localStorage.setItem('current-progress', JSON.stringify(progress));
 };
 
 
@@ -62,7 +59,6 @@ const scrollToBottom = async () => {
             behavior: 'smooth',
         });
     } else {
-        // Handle potential errors (optional)
         console.warn('Scrollable container element not found.');
     }
 };
@@ -85,7 +81,7 @@ onMounted(() => {
 
     window.onbeforeunload = (event) => {
         saveProgress();
-        return null; // Optional: prevent default message (use with caution)
+        return null;
     };
 
 
@@ -122,7 +118,7 @@ async function fetchChapters() {
 }
 
 function handleClickChapter(chapterino) {
-    console.log(chapterino)
+    // console.log(chapterino)
     const chapterStartTime = parseFloat(chapterino.start_time);
     instance.refs.playerx.player.currentTime = chapterStartTime;
 }
@@ -170,6 +166,7 @@ const loadLikedVideos = () => {
 <template>
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <VueDraggableResizable :w="300" :h="320" :min-width="240" :max-width="480" :min-height="80" :max-height="720"
+            v-if="chat"
             class="bg-black bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container"
             style="z-index:20;position:fixed;">
             <div class="text-xs text-white w-full overflow-y-scroll"
@@ -181,7 +178,7 @@ const loadLikedVideos = () => {
                 <br>
                 <br>
                 <br>
-                <div v-if="chat">
+                <div>
                     <div v-for="comment in filteredComments"
                         class="flex gap-1 flex-wrap border-b border-neutral-900 py-2" style="display:non">
                         <p class="text-neutral-500">{{ comment.created_at.substring(11, 19) }}</p>
@@ -208,16 +205,13 @@ const loadLikedVideos = () => {
         </vue-plyr>
 
 
-
-        <div v-if="chat.video.chapters[0].gameBoxArtUrl !== null"
+        <div v-if="chat && chat.video && chat.video.chapters && chat.video.chapters[0] && chat.video.chapters[0].gameBoxArtUrl"
             class="flex mt-6 flex-row gap-2 justify-center text-white">
             <div class="flex flex-row items-center border border-neutral-800 rounded-xl overflow-hidden">
                 <img :src="chat.video.chapters[0].gameBoxArtUrl">
                 <p class="px-2">{{ chat.video.chapters[0].gameDisplayName }}</p>
             </div>
-
         </div>
-
 
         <div
             class="flex bg-neutral-900 px-6 py-6 mt-6 rounded-2xl flex border-t border-neutral-800 shadow-xl flex-grow flex-wrap gap-6">
@@ -225,7 +219,7 @@ const loadLikedVideos = () => {
                 <NuxtLink :to="'../' + chosenStreamer"><img
                         :src='"https://cdn1.fivecity.watch/avatar/" + chosenStreamer + ".jpg"'
                         class="w-32 h-32 rounded-full mr-3"></NuxtLink>
-                <div class="flex-grow">
+                <div class="flex-grow w-72">
                     <NuxtLink :to="'../' + chosenStreamer">
                         <h1 class="text-xl font-bold underline text-yellow-400">{{ chosenStreamer }}</h1>
                     </NuxtLink>
@@ -235,7 +229,7 @@ const loadLikedVideos = () => {
                     <p><sub>TYTUŁ ARCHIWUM.WATCH</sub><br> {{
                         chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2) }}</p>
                     <div
-                        v-if="chat.video !== null && chat.video.title !== chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2)">
+                        v-if="chat && chat.video && chat.video.title && chat.video.title !== chosenVideo.substring(11).substring(chosenVideo.substring(11).indexOf('-') + 2)">
                         <p><sub>TYTUŁ ORYGINALNY</sub><br> {{ chat.video.title }}</p>
                     </div>
 
@@ -260,9 +254,10 @@ const loadLikedVideos = () => {
 
 
             </div>
-            <div class="flex gap-1 flex-grow-0 md:ml-2 justify-end flex-grow items-center flex-wrap md:gap-3">
+            <div
+                class="flex gap-3 flex-grow-1 md:ml-2 justify-end flex-grow items-center flex-wrap justify-around md:justify-end md:flex-grow-0">
 
-                <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
+                <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
                 flex flex-col items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
                 outline-yellow-900 hover:bg-yellow-900 hover:bg-opacity-20 hover:border-yellow-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
@@ -295,7 +290,7 @@ const loadLikedVideos = () => {
                 </transition>
 
                 <a :href="'https://cdn1.fivecity.watch/test/' + chosenStreamer + '/' + chosenVideo + '.mp4'" download>
-                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
+                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
                 flex flex-col items-center justify-center text-neutral-600 hover:text-blue-400 transition 
                 outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
@@ -307,18 +302,19 @@ const loadLikedVideos = () => {
                         <p class="text-sm mt-2">Pobierz</p>
                     </div>
                 </a>
-
-                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
+                <a href="https://twitter.com/archiwumwatch">
+                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
                 flex flex-col items-center justify-center text-neutral-600 hover:text-purple-400 transition 
                 outline-purple-900 hover:bg-purple-900 hover:bg-opacity-20 hover:border-purple-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
                 outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(107,33,168,0.4)]
                 hover:outline-1 cursor-pointer
                 ">
-                    <Icon name="material-symbols:auto-fix" size="32px" class="">
-                    </Icon>
-                    <p class="text-sm mt-2">Zgłoś poprawkę</p>
-                </div>
+                        <Icon name="material-symbols:auto-fix" size="32px" class="">
+                        </Icon>
+                        <p class="text-sm mt-2">Zgłoś poprawkę</p>
+                    </div>
+                </a>
             </div>
 
 
