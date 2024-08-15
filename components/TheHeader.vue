@@ -1,7 +1,7 @@
 <script setup>
 const indexName = 'Buli'
-const algolia = useAlgoliaRef()
-import { AisInstantSearch, AisSearchBox, AisHits, AisHighlight, AisPagination } from 'vue-instantsearch/vue3/es'
+const algolia = useInstantSearch()
+import { AisInstantSearch, AisSearchBox, AisHits, AisHighlight, AisPagination, AisConfigure } from 'vue-instantsearch/vue3/es'
 
 const showHits = ref(false);
 
@@ -19,6 +19,10 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
+
+const searchConfig = {
+    hitsPerPage: 4
+}
 </script>
 
 <template>
@@ -49,8 +53,13 @@ onUnmounted(() => {
             <div class="overlay" v-show="showHits" @click="handleClose"></div>
         </transition>
 
+
+
         <ais-instant-search :index-name="indexName" :search-client="algolia" class="flex flex-grow z-10"
             @click="showHits = true">
+
+            <ais-configure v-bind="searchConfig" />
+
             <div class="flex-grow bg-gray-900 bg-opacity-20 rounded-2xl border border-purple-400 backdrop-blur-lg flex items-center gap-2 px-4"
                 style="min-height:60px;">
 
@@ -64,7 +73,7 @@ onUnmounted(() => {
 
             <transition name="slide">
                 <div class="absolute ais-Box" v-if="showHits" @click.stop>
-                    <ais-hits :hits-per-page="2"
+                    <ais-hits
                         class="flex flex-col backdrop-blur-lg bg-black/50 rounded-2xl border border-purple-400/30 overflow-hidden -ml-2 md:ml-0">
                         <template v-slot="{ items }">
                             <div v-for="item in items" :key="item.objectID" class="overflow-hidden px-2 hover:bg-purple-700/80 transition text-neutral-200 hover:text-white
@@ -74,7 +83,7 @@ onUnmounted(() => {
                                     class="flex gap-2 items-center">
                                     <div class="shrink-0 img-overlay">
                                         <img :src="'https://cdn1.fivecity.watch/test/' + item.streamer_name + '/' + item.filename + '.jpg'"
-                                            class="h-12 md:h-20"></img>
+                                            class="h-12 md:h-20" loading="lazy"></img>
                                     </div>
 
                                     <div class="py-3 md:py-6">
@@ -93,8 +102,7 @@ onUnmounted(() => {
                         </template>
 
                     </ais-hits>
-                    <ais-pagination :total-pages="10" :padding="1" class="transition" :showNext="false"
-                        :showPrevious="false" />
+                    <ais-pagination :padding="1" class="transition" :showNext="false" :showPrevious="false" />
                 </div>
 
 

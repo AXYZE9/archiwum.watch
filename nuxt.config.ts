@@ -5,20 +5,16 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     'nuxt-icon',
     '@nuxtjs/google-fonts',
-    "@nuxtjs/algolia"
+    'nuxt-meilisearch'
   ],
   googleFonts: {
     families: {
       Poppins: [400, 700, 900]
     }
   },
-  algolia: {
-    apiKey: 'dc0298095ba5f338ba6aca8b1cbb2896',
-    applicationId: '5NXV3JH6H3',
-    globalIndex: '',
-    lite: true,
-    cache: true,
-    useFetch: false,
+  meilisearch: {
+    hostUrl: 'https://cdn1.fivecity.watch:7700/',
+    searchApiKey: '45b7fda5068e086be7df0e92a9c674dbf37d5dd478606597dbfb1d13241748b9',
     instantSearch: {
       theme: 'reset'
     },

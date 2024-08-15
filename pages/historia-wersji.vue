@@ -2,7 +2,12 @@
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
-            <h2 class="text-white text-bold">v2.0 (15.08.2024)</h2>
+            <h2 class="text-white text-bold">v2.2 (15.08.2024)</h2>
+            <p>✅ Zmiana silnika magicznej wyszukiwarki z Algolia na MeiliSearch Open Source</p>
+            <p>✅ Dodanie atrybutu lazy do obrazków w magicznej wyszukiwarce</p>
+        </div>
+        <div class="py-2">
+            <h2 class="text-white text-bold">v2.1 (15.08.2024)</h2>
             <p>✅ Dodano paginacje do wyników wyszukiwania</p>
             <p>✅ Małe optymalizacje ładowania podstron</p>
         </div>
