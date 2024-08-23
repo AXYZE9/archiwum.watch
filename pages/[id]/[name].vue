@@ -161,6 +161,58 @@ const loadLikedVideos = () => {
     return storedVideos ? JSON.parse(storedVideos) : [];
 };
 
+// Function to get time from query parameter
+const getTimeFromQuery = () => {
+    const timeParam = route.query.time;
+    return timeParam ? parseInt(String(timeParam), 10) : null;
+};
+
+
+// Function to set player time from query
+const setPlayerTimeFromQuery = () => {
+    const queryTime = getTimeFromQuery();
+    if (queryTime !== null) {
+        instance.refs.playerx.player.currentTime = queryTime;
+    }
+};
+
+// Function to share current time
+const shareCurrentTime = () => {
+    const currentTime = Math.floor(instance.refs.playerx.player.currentTime);
+    const shareUrl = `${window.location.origin}${route.path}?time=${currentTime}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        showModal.value = true;
+        modalMessage.value = 'Link skopiowany do schowka! 🔗';
+        setTimeout(() => {
+            showModal.value = false;
+        }, 3000);
+    });
+};
+
+onMounted(() => {
+    instance.refs.playerx.player.on('loadeddata', (event) => {
+        const storedProgress = localStorage.getItem('current-progress');
+        if (storedProgress) {
+            const progressArray = JSON.parse(storedProgress);
+            const matchingProgress = progressArray.find(item => item.url === route.params.name);
+
+            if (matchingProgress) {
+                duration.value = matchingProgress.duration;
+                instance.refs.playerx.player.currentTime = duration.value;
+            }
+        }
+
+        setPlayerTimeFromQuery();
+    });
+
+    loadLikedVideos();
+
+    window.onbeforeunload = (event) => {
+        saveProgress();
+        return null;
+    };
+});
+
 </script>
 
 <template>
@@ -315,6 +367,17 @@ const loadLikedVideos = () => {
                         <p class="text-sm mt-2">Zgłoś poprawkę</p>
                     </div>
                 </a>
+                <div @click="shareCurrentTime" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-green-400 transition 
+                outline-green-900 hover:bg-green-900 hover:bg-opacity-20 hover:border-green-600
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,107,0.4)]
+                hover:outline-1 cursor-pointer
+                ">
+                    <Icon name="material-symbols:share" size="32px" class="">
+                    </Icon>
+                    <p class="text-sm mt-2">Udostępnij</p>
+                </div>
             </div>
 
 

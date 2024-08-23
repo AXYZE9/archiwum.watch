@@ -12,12 +12,6 @@ const chosenStreamer = ref();
                 <source src="https://archiwum.watch/media/background-h265.mp4" type="video/mp4">
             </video>
         </div>
-        <!-- Streamer List -->
-        <!-- <p class="text-white">
-            {{ chosenStreamer }}
-            <br>
-            {{ chosenStreamerStreams }}
-        </p> -->
 
 
         <div class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap underline card-container">

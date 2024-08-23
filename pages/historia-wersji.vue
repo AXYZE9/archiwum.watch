@@ -2,6 +2,12 @@
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
+            <h2 class="text-white text-bold">v2.3 (23.08.2024)</h2>
+            <p>✅ Linki z aktualnym czasem oglądania (timestamp)</p>
+            <p>✅ Kliknięcie w wynik wyszukiwania magicznej wyszukiwarki przenosi do odpowiedniego momentu w filmie
+                (timestamp)</p>
+        </div>
+        <div class="py-2">
             <h2 class="text-white text-bold">v2.2 (15.08.2024)</h2>
             <p>✅ Zmiana silnika magicznej wyszukiwarki z Algolia na MeiliSearch Open Source</p>
             <p>✅ Dodanie atrybutu lazy do obrazków w magicznej wyszukiwarce</p>
@@ -21,7 +27,6 @@
             <p>✅ Lajkowanie filmów</p>
             <p>✅ Replay czatu</p>
             <p>✅ Wznawianie filmu od ostatnio oglądanego momentu</p>
-
         </div>
 
         <div class="py-2">

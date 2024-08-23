@@ -23,6 +23,28 @@ onUnmounted(() => {
 const searchConfig = {
     hitsPerPage: 4
 }
+
+// Function to convert timestamp to seconds
+const convertTimestampToSeconds = (timestamp) => {
+    const parts = timestamp.split(':');
+    let seconds = 0;
+
+    if (parts.length === 3) {
+        // Format: HH:MM:SS.mmm
+        seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+    } else if (parts.length === 2) {
+        // Format: MM:SS.mmm
+        seconds = parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+    }
+
+    return Math.floor(seconds);
+};
+
+// Function to generate URL with timestamp
+const generateUrlWithTimestamp = (baseUrl, timestamp) => {
+    const seconds = convertTimestampToSeconds(timestamp);
+    return `${baseUrl}?time=${seconds}`;
+};
 </script>
 
 <template>
@@ -79,7 +101,7 @@ const searchConfig = {
                             <div v-for="item in items" :key="item.objectID" class="overflow-hidden px-2 hover:bg-purple-700/80 transition text-neutral-200 hover:text-white
                             searchitem">
                                 <NuxtLink @click="showHits = false"
-                                    :href="'/' + item.streamer_name + '/' + item.filename"
+                                    :href="generateUrlWithTimestamp('/' + item.streamer_name + '/' + item.filename, item.start_time)"
                                     class="flex gap-2 items-center">
                                     <div class="shrink-0 img-overlay">
                                         <img :src="'https://cdn1.fivecity.watch/test/' + item.streamer_name + '/' + item.filename + '.jpg'"
