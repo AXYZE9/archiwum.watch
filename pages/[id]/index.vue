@@ -1,16 +1,31 @@
 <script setup>
 const route = useRoute();
 const chosenCreatorName = route.params.id;
-// console.log(chosenCreatorName)
-const { data: chosenStreamerStreams } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenCreatorName);
 
-// Get just mp4 files from object array that has variety of extensions
+// Add caching to the fetch call
+const { data: chosenStreamerStreams, pending } = useFetch('https://cdn1.fivecity.watch/test/' + chosenCreatorName, {
+    // Use unique key for each streamer
+    key: `streamer-${chosenCreatorName}`,
+    getCachedData: (key) => {
+        const cached = useNuxtData(key).data.value;
+        if (cached) {
+            const cacheTime = localStorage.getItem(`${key}-cacheTime`);
+            if (cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) { // 1 hour cache
+                return cached;
+            }
+        }
+        return null;
+    },
+    onResponse({ response }) {
+        localStorage.setItem(`streamer-${chosenCreatorName}-cacheTime`, Date.now().toString());
+    }
+});
+
+// Get just mp4 files from object array that has variety of extensions and reverse the order
 const filteredVideos = computed(() => {
-    return chosenStreamerStreams.value.filter(object => object.name.includes("mp4"));
+    if (!chosenStreamerStreams.value) return [];
+    return chosenStreamerStreams.value.filter(object => object.name.includes("mp4")).reverse();
 })
-
-filteredVideos.value.reverse();
-// Check if captions file (filename.vtt) exists
 
 function getCaptionName(streamName) {
     const baseName = streamName.slice(0, -4);
@@ -62,13 +77,66 @@ onBeforeUnmount(() => {
 
 const pageSize = 12;
 const currentPage = ref(1);
-const paginatedVideos = computed(() => {
-    const start = (currentPage.value - 1) * pageSize;
-    return filteredVideos.value.slice(start, start + pageSize);
+
+// Add these new refs and computed properties after filteredVideos
+const selectedFilter = ref('all');
+
+const availableFilters = computed(() => {
+    if (!filteredVideos.value) return [];
+
+    // Get unique month/year combinations from video names
+    const filters = new Set();
+    filters.add('all');
+
+    filteredVideos.value.forEach(video => {
+        const month = video.name.slice(4, 6);
+        const year = '20' + video.name.slice(1, 3);
+        filters.add(`${month}/${year}`);
+    });
+
+    return Array.from(filters).sort((a, b) => {
+        if (a === 'all') return -1;
+        if (b === 'all') return 1;
+
+        // Split the dates into month and year
+        const [monthA, yearA] = a.split('/');
+        const [monthB, yearB] = b.split('/');
+
+        // Compare years first
+        if (yearA !== yearB) {
+            return yearB - yearA; // Descending order of years
+        }
+
+        // If years are same, compare months
+        return monthB - monthA; // Descending order of months
+    });
 });
 
+// Update paginatedVideos to use filtered results
+const filteredByDate = computed(() => {
+    if (selectedFilter.value === 'all') return filteredVideos.value;
+
+    return filteredVideos.value.filter(video => {
+        const month = video.name.slice(4, 6);
+        const year = '20' + video.name.slice(1, 3);
+        return `${month}/${year}` === selectedFilter.value;
+    });
+});
+
+// Update paginatedVideos to use filteredByDate instead of filteredVideos
+const paginatedVideos = computed(() => {
+    const start = (currentPage.value - 1) * pageSize;
+    return filteredByDate.value.slice(start, start + pageSize);
+});
+
+// Update isNextPage to use filteredByDate
 const isNextPage = computed(() => {
-    return (currentPage.value * pageSize) < filteredVideos.value.length;
+    return (currentPage.value * pageSize) < filteredByDate.value.length;
+});
+
+// When filter changes, reset to first page
+watch(selectedFilter, () => {
+    currentPage.value = 1;
 });
 
 const isPreviousPage = computed(() => {
@@ -101,13 +169,39 @@ function previousPage() {
             </div>
         </div>
 
-        <div class="text-white flex gap-6 flex-wrap justify-center mx-auto max-w-screen-xl">
+        <!-- Filter buttons - only show when data is loaded -->
+        <div v-if="!pending" class="relative z-10 flex flex-wrap justify-center gap-2 mb-8 mx-auto max-w-screen-xl">
+            <button v-for="filter in availableFilters" :key="filter" @click="selectedFilter = filter"
+                class="px-4 py-2 rounded-xl transition" :class="{
+                    'bg-purple-800 text-white hover:bg-purple-700': selectedFilter === filter,
+                    'bg-neutral-800 text-neutral-300 hover:bg-neutral-700': selectedFilter !== filter
+                }">
+                {{ filter === 'all' ? 'Wszystkie' : filter }}
+            </button>
+        </div>
+
+        <!-- Skeleton loading state - show when pending -->
+        <div v-if="pending" class="text-white flex gap-6 flex-wrap justify-center mx-auto max-w-screen-xl">
+            <div v-for="n in 12" :key="n" class="flex">
+                <div
+                    class="animate-pulse w-96 max-w-lg flex-grow border border-purple-900/50 rounded-xl overflow-hidden">
+                    <div class="h-48 bg-purple-900/20"></div>
+                    <div class="px-4 py-4 space-y-3">
+                        <div class="h-5 w-32 bg-purple-900/20 rounded"></div>
+                        <div class="h-4 w-full bg-purple-900/20 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actual content - show when not pending -->
+        <div v-else class="text-white flex gap-6 flex-wrap justify-center mx-auto max-w-screen-xl">
             <div v-for='stream in paginatedVideos' class="flex zoomOnHover" :key="stream.name">
                 <nuxt-link :to="chosenCreatorName + '/' + stream.name.slice(0, -4)" class="videoCard border border-purple-900 rounded-xl
                     shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0px_0px_70px_rgba(59,7,100,0.7)]
                     hover:border-yellow-400 hover:bg-stone-800 hover:shadow-yellow-900
                     transition overflow-hidden
-                    w-96 max-w-lg flex-grow videoAnimation
+                    w-96 max-w-lg flex-grow z-0
         ">
                     <div class="flex gap-2 mt-2 ml-2 absolute">
                         <span v-if="hasCaptions(stream.name)"
@@ -133,7 +227,7 @@ function previousPage() {
             </div>
 
         </div>
-        <div class="z-10 relative flex justify-around mt-12 gap-6">
+        <div v-if="!pending" class="z-10 relative flex justify-around mt-12 gap-6">
             <button v-if="isPreviousPage" @click="previousPage" class="border-t border-neutral-700 bg-neutral-600 bg-opacity-10 md:flex-grow=0 px-4 py-2 gap-2 rounded-xl
                 flex items-center justify-center text-neutral-200 hover:text-yellow-300 transition 
                 outline-yellow-900 hover:bg-orange-900 hover:bg-opacity-20 hover:border-yellow-400
@@ -319,5 +413,21 @@ function previousPage() {
     top: -50%;
     left: -50%;
     opacity: 1
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
+    }
 }
 </style>

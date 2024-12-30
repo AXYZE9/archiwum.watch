@@ -2,6 +2,17 @@
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
+            <h2 class="text-white text-bold">v2.4 (03.01.2025)</h2>
+            <p>✅ Przyspieszenie ładowania każdej podstrony przez odłożenie w czasie zapytań do serwera</p>
+            <p>✅ Buforowanie w pamięci przeglądarki listy streamerów oraz ich VoDów</p>
+            <p>✅ Filtrowanie po miesiącu i roku</p>
+
+            <p>⌛ Miniatury po najechaniu na pasek postepu</p>
+            <p>⌛ Dodano "W tym dniu, we wcześniejszych latach" na stronie startowej</p>
+            <p>⌛ Nowy widok playera "Teatr", który optymalizuje oglądanie filmów z czatem</p>
+
+        </div>
+        <div class="py-2">
             <h2 class="text-white text-bold">v2.3 (23.08.2024)</h2>
             <p>✅ Linki z aktualnym czasem oglądania (timestamp)</p>
             <p>✅ Kliknięcie w wynik wyszukiwania magicznej wyszukiwarki przenosi do odpowiedniego momentu w filmie
@@ -38,7 +49,6 @@
             <h1 class="text-white text-bold text-2xl text-yellow-400">Planowane zmiany</h1>
             <p>⌛ Optymalizacja API (filtrowanie obiektów + paginacja po stronie serwera), znacznie przyspieszy to czas
                 ładowania stron z listą filmów danego twórcy</p>
-            <p>⌛ Miniatury po najechaniu na pasek postepu</p>
             <p>⌛ Pełnoekranowy odtwarzacz z czatem na telefonie</p>
         </div>
     </div>

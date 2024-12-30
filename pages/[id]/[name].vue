@@ -2,13 +2,19 @@
 const route = useRoute();
 const chosenStreamer = route.params.id;
 const chosenVideo = route.params.name;
-const { data: chat } = await useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json");
+
+// Remove await and handle loading state
+const { data: chat, pending: chatLoading } = useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json", {
+    key: `chat-${chosenStreamer}-${chosenVideo}`,
+    lazy: true, // This makes the fetch non-blocking
+});
 
 const instance = getCurrentInstance()
 const duration = ref(0)
 const playerx = ref(null)
 const showModal = ref(false);
 const modalMessage = ref('');
+const isTheatreMode = ref(false);
 import VueDraggableResizable from 'vue-draggable-resizable'
 
 
@@ -50,8 +56,6 @@ const scrollableContainerRef = ref(null);
 const scrollToBottom = async () => {
     // Wait for the element to be rendered
     await nextTick();
-
-
 
     if (scrollableContainerRef.value) {
         scrollableContainerRef.value.scrollTo({
@@ -102,6 +106,7 @@ function videoTimeUpdated() {
 }
 
 const filteredComments = computed(() => {
+    if (!chat.value?.comments) return [];
     return chat.value.comments.filter(comment => comment.content_offset_seconds < duration.value).slice(-30)
 })
 
@@ -224,22 +229,28 @@ onMounted(() => {
             <div class="text-xs text-white w-full overflow-y-scroll"
                 style="touch-action: none;    scrollbar-color: #9037e9 rgb(255 255 255 / 5%);"
                 ref="scrollableContainerRef">
-                <br> Tutaj będzie wyświetlany czat! 😊
-                <br> ↔ Pociągając za krawędź możesz zmienić rozmiar czatu
-                <br> ☝️ Przeciągając ten element możesz zmienić jego położenie
-                <br>
-                <br>
-                <br>
-                <div>
-                    <div v-for="comment in filteredComments"
-                        class="flex gap-1 flex-wrap border-b border-neutral-900 py-2" style="display:non">
-                        <p class="text-neutral-500">{{ comment.created_at.substring(11, 19) }}</p>
-                        <img :src="comment.commenter.logo" class="w-4 h-4 rounded-full">
-
-                        <b>{{ comment.commenter.display_name }}</b>
-                        <p>{{ comment.message.body }}</p>
+                <template v-if="chatLoading">
+                    <div class="p-4 text-center">
+                        <p>Ładowanie czatu...</p>
                     </div>
-                </div>
+                </template>
+                <template v-else>
+                    <br> Tutaj będzie wyświetlany czat! 😊
+                    <br> ↔ Pociągając za krawędź możesz zmienić rozmiar czatu
+                    <br> ☝️ Przeciągając ten element możesz zmienić jego położenie
+                    <br>
+                    <br>
+                    <br>
+                    <div>
+                        <div v-for="comment in filteredComments"
+                            class="flex gap-1 flex-wrap border-b border-neutral-900 py-2">
+                            <p class="text-neutral-500">{{ comment.created_at.substring(11, 19) }}</p>
+                            <img :src="comment.commenter.logo" class="w-4 h-4 rounded-full">
+                            <b>{{ comment.commenter.display_name }}</b>
+                            <p>{{ comment.message.body }}</p>
+                        </div>
+                    </div>
+                </template>
             </div>
 
         </VueDraggableResizable>
@@ -247,7 +258,8 @@ onMounted(() => {
 
 
         <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx" class="z-20">
-            <video :emit="['timeupdate']" controls crossorigin playsinline>
+            <video :emit="['timeupdate']" controls crossorigin playsinline
+                :data-poster="`https://cdn1.fivecity.watch/test/${chosenStreamer}/${chosenVideo}.jpg`">
                 <source :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".mp4"'
                     type="video/mp4" />
                 <track default kind="captions" label="Polskie napisy (AI)"
@@ -268,9 +280,10 @@ onMounted(() => {
         <div
             class="flex bg-neutral-900 px-6 py-6 mt-6 rounded-2xl flex border-t border-neutral-800 shadow-xl flex-grow flex-wrap gap-6">
             <div class="flex items-center flex-grow flex-wrap justify-center">
-                <NuxtLink :to="'../' + chosenStreamer"><img
+                <NuxtLink :to="' ../' + chosenStreamer"><img
                         :src='"https://cdn1.fivecity.watch/avatar/" + chosenStreamer + ".jpg"'
-                        class="w-32 h-32 rounded-full mr-3"></NuxtLink>
+                        class="w-32 h-32 rounded-full mr-3">
+                </NuxtLink>
                 <div class="flex-grow w-72">
                     <NuxtLink :to="'../' + chosenStreamer">
                         <h1 class="text-xl font-bold underline text-yellow-400">{{ chosenStreamer }}</h1>
@@ -446,5 +459,10 @@ onMounted(() => {
     .plyr__volume input[data-plyr="volume"]:hover {
         display: block !important;
     }
+}
+
+.plyr__poster {
+    filter: blur(10px) brightness(0.7);
+    transform: scale(1.1);
 }
 </style>

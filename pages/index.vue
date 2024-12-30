@@ -1,5 +1,21 @@
 <script setup>
-const { data: streamerList } = await useFetch('https://cdn1.fivecity.watch/test/');
+const { data: streamerList, pending } = useFetch('https://cdn1.fivecity.watch/test/', {
+    key: 'streamerList',
+    getCachedData: (key) => {
+        const cached = useNuxtData(key).data.value;
+        if (cached) {
+            const cacheTime = localStorage.getItem('streamerListCacheTime');
+            if (cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) {
+                return cached;
+            }
+        }
+        return null;
+    },
+    onResponse({ response }) {
+        localStorage.setItem('streamerListCacheTime', Date.now().toString());
+    }
+});
+
 const chosenStreamer = ref();
 </script>
 
@@ -13,8 +29,13 @@ const chosenStreamer = ref();
             </video>
         </div>
 
+        <div v-if="pending && !streamerList" class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap">
+            <div v-for="n in 6" :key="n" class="animate-pulse">
+                <div class="w-48 h-48 bg-purple-900/20 rounded-lg"></div>
+            </div>
+        </div>
 
-        <div class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap underline card-container">
+        <div v-else class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap underline card-container">
             <div class="flex card-effect" v-for="streamer in streamerList">
                 <nuxt-link :to='streamer.name'>
                     <div class="" @click='chosenStreamer = streamer.name'>
@@ -26,7 +47,6 @@ const chosenStreamer = ref();
                 </nuxt-link>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -131,6 +151,22 @@ const chosenStreamer = ref();
 
     100% {
         opacity: 1;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .5;
     }
 }
 </style>
