@@ -2,10 +2,14 @@
     <div class="text-neutral-400 p-4 py-12 mx-auto max-w-screen-xl ">
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
-            <h2 class="text-white text-bold">v2.4 (03.01.2025)</h2>
+            <h2 class="text-white text-bold">v3.0 (03.01.2025)</h2>
             <p>✅ Przyspieszenie ładowania każdej podstrony przez odłożenie w czasie zapytań do serwera</p>
             <p>✅ Buforowanie w pamięci przeglądarki listy streamerów oraz ich VoDów</p>
             <p>✅ Filtrowanie po miesiącu i roku</p>
+            <p>✅ Naprawiono problem z bardzo długimi ciągami znaków w czacie, które powodowały wychodzenie tekstu poza
+                obszar
+                czatu
+            </p>
 
             <p>⌛ Miniatury po najechaniu na pasek postepu</p>
             <p>⌛ Dodano "W tym dniu, we wcześniejszych latach" na stronie startowej</p>

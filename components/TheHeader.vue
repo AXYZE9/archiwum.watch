@@ -24,7 +24,6 @@ const searchConfig = {
     hitsPerPage: 4
 }
 
-// Function to convert timestamp to seconds
 const convertTimestampToSeconds = (timestamp) => {
     const parts = timestamp.split(':');
     let seconds = 0;
@@ -40,7 +39,6 @@ const convertTimestampToSeconds = (timestamp) => {
     return Math.floor(seconds);
 };
 
-// Function to generate URL with timestamp
 const generateUrlWithTimestamp = (baseUrl, timestamp) => {
     const seconds = convertTimestampToSeconds(timestamp);
     return `${baseUrl}?time=${seconds}`;

@@ -18,7 +18,7 @@ const isTheatreMode = ref(false);
 import VueDraggableResizable from 'vue-draggable-resizable'
 
 
-import { ref, nextTick, onMounted, onUpdated } from 'vue';
+import { ref, nextTick, onMounted, onUpdated, watch } from 'vue';
 
 //Polubienia
 const likedVideos = ref([]);
@@ -218,6 +218,14 @@ onMounted(() => {
     };
 });
 
+const toggleTheatreMode = () => {
+    isTheatreMode.value = !isTheatreMode.value;
+};
+
+watch(isTheatreMode, (newValue) => {
+    document.documentElement.setAttribute('data-theatre-mode', newValue.toString());
+});
+
 </script>
 
 <template>
@@ -247,7 +255,7 @@ onMounted(() => {
                             <p class="text-neutral-500">{{ comment.created_at.substring(11, 19) }}</p>
                             <img :src="comment.commenter.logo" class="w-4 h-4 rounded-full">
                             <b>{{ comment.commenter.display_name }}</b>
-                            <p>{{ comment.message.body }}</p>
+                            <p style="word-break: break-word;">{{ comment.message.body }}</p>
                         </div>
                     </div>
                 </template>
@@ -257,23 +265,125 @@ onMounted(() => {
 
 
 
-        <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx" class="z-20">
-            <video :emit="['timeupdate']" controls crossorigin playsinline
-                :data-poster="`https://cdn1.fivecity.watch/test/${chosenStreamer}/${chosenVideo}.jpg`">
-                <source :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".mp4"'
-                    type="video/mp4" />
-                <track default kind="captions" label="Polskie napisy (AI)"
-                    :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".vtt"'
-                    srclang="pl" />
-            </video>
-        </vue-plyr>
+        <div class="theatre-mode flex flex-col md:flex-row md:items-center max-md:-ml-4 max-md:-mr-4">
+            <div class="relative md:rounded-2xl overflow-hidden">
+                <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx" class="z-20">
+                    <video :emit="['timeupdate']" controls crossorigin playsinline
+                        :data-poster="`https://cdn1.fivecity.watch/test/${chosenStreamer}/${chosenVideo}.jpg`">
+                        <source :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".mp4"'
+                            type="video/mp4" />
+                        <track default kind="captions" label="Polskie napisy (AI)"
+                            :src='"https://cdn1.fivecity.watch/test/" + chosenStreamer + "/" + chosenVideo + ".vtt"'
+                            srclang="pl" />
+                    </video>
+                </vue-plyr>
+                <button v-if="isTheatreMode" @click="toggleTheatreMode"
+                    class="absolute md:fixed mt-2 md:top-0 right-2 z-[101] bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-1 rounded-lg transition-all duration-200 hover:scale-110 border-2 border-neutral-800">
+                    <Icon name="material-symbols:close" size="24px" />
+                </button>
+            </div>
+            <div v-if="chat"
+                class="bg-black hidden bg-opacity-80 backdrop-blur text-white px-1 pb-1 rounded text-xs flex scrollable-container w-full md:w-[500px] md:h-full h-32 flex-grow"
+                style="z-index:20;">
+                <div class="text-xs text-white w-full overflow-y-scroll h-full"
+                    style="touch-action: none;    scrollbar-color: #9037e9 rgb(255 255 255 / 5%);"
+                    ref="scrollableContainerRef">
+                    <template v-if="chatLoading">
+                        <div class="p-4 text-center">
+                            <p>Ładowanie czatu...</p>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <br> Tutaj będzie wyświetlany czat! 😊
+                        <br> ↔ Pociągając za krawędź możesz zmienić rozmiar czatu
+                        <br> ☝️ Przeciągając ten element możesz zmienić jego położenie
+                        <br>
+                        <br>
+                        <br>
+                        <div>
+                            <div v-for="comment in filteredComments"
+                                class="flex gap-1 flex-wrap border-b border-neutral-900 py-2">
+                                <p class="text-neutral-500">{{ comment.created_at.substring(11, 19) }}</p>
+                                <img :src="comment.commenter.logo" class="w-4 h-4 rounded-full">
+                                <b>{{ comment.commenter.display_name }}</b>
+                                <p style="word-break: break-word;">{{ comment.message.body }}</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
 
+        <div
+            class="flex gap-3 md:gap-6 px-2 py-4 flex-grow-1 md:ml-2 justify-center flex-grow items-center flex-wrap md:flex-grow-0">
 
-        <div v-if="chat && chat.video && chat.video.chapters && chat.video.chapters[0] && chat.video.chapters[0].gameBoxArtUrl"
-            class="flex mt-6 flex-row gap-2 justify-center text-white">
-            <div class="flex flex-row items-center border border-neutral-800 rounded-xl overflow-hidden">
-                <img :src="chat.video.chapters[0].gameBoxArtUrl">
-                <p class="px-2">{{ chat.video.chapters[0].gameDisplayName }}</p>
+            <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 w-28 bg-opacity-10 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
+                outline-yellow-900 hover:bg-yellow-900 hover:bg-opacity-20 hover:border-yellow-600
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(255,215,0,0.2)]
+                hover:outline-1 cursor-pointer
+                ">
+                <Icon name="material-symbols:favorite" size="32px" class="">
+                </Icon>
+                <p class="text-sm mt-2">Polub</p>
+            </div>
+            <transition name="slide-up">
+                <div class="fixed py-2 bottom-10 px-2 z-30 w-screen left-0 flex justify-center" v-if="showModal">
+                    <div class="absolute -bottom-12 -rotate-6 px-2 z-20 w-screen flex justify-center">
+                        <p class="w-48 justify-end flex h-48 items-center serduszko mr-96">
+                            <Icon name="fluent-emoji-flat:red-heart" size="120px" class="text-purple-400" />
+                        </p>
+                    </div>
+                    <div class="absolute -bottom-12 rotate-6 px-2 z-20 w-screen flex justify-center">
+                        <p class="w-48 justify-start flex h-48 items-center serduszko ml-96">
+                            <Icon name="fluent-emoji-flat:red-heart" size="96px" class="text-purple-400" />
+                        </p>
+                    </div>
+                    <p
+                        class="text-white bg-neutral-800 z-30 rounded-xl px-4 py-2 border-t-neutral-600 border-b-neutrl-900 border border-transparent shadow-2xl shadow-red-900">
+
+                        {{
+                            modalMessage }}
+                    </p>
+                </div>
+            </transition>
+
+            <a :href="'https://cdn1.fivecity.watch/test/' + chosenStreamer + '/' + chosenVideo + '.mp4'" download>
+                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-blue-400 transition 
+                outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,107,168,0.4)]
+                hover:outline-1 cursor-pointer
+                ">
+                    <Icon name="material-symbols:download" size="32px" class="">
+                    </Icon>
+                    <p class="text-sm mt-2">Pobierz</p>
+                </div>
+            </a>
+            <div @click="shareCurrentTime" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-green-400 transition 
+                outline-green-900 hover:bg-green-900 hover:bg-opacity-20 hover:border-green-600
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,107,0.4)]
+                hover:outline-1 cursor-pointer
+                ">
+                <Icon name="material-symbols:share" size="32px" class="">
+                </Icon>
+                <p class="text-sm mt-2">Udostępnij</p>
+            </div>
+            <div @click="toggleTheatreMode" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
+                flex flex-col items-center justify-center text-neutral-600 hover:text-teal-400 transition 
+                outline-teal-900 hover:bg-teal-900 hover:bg-opacity-20 hover:border-teal-600
+                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,158,0.4)]
+                hover:outline-1 cursor-pointer
+                ">
+                <Icon :name="isTheatreMode ? 'material-symbols:close-fullscreen' : 'material-symbols:open-in-full'"
+                    size="32px" class="">
+                </Icon>
+                <p class="text-sm mt-2">Tryb kinowy</p>
             </div>
         </div>
 
@@ -316,81 +426,16 @@ onMounted(() => {
                     </div>
                 </div>
 
-
-
-            </div>
-            <div
-                class="flex gap-3 flex-grow-1 md:ml-2 justify-end flex-grow items-center flex-wrap justify-around md:justify-end md:flex-grow-0">
-
-                <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
-                outline-yellow-900 hover:bg-yellow-900 hover:bg-opacity-20 hover:border-yellow-600
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(255,215,0,0.2)]
-                hover:outline-1 cursor-pointer
-                ">
-                    <Icon name="material-symbols:favorite" size="32px" class="">
-                    </Icon>
-                    <p class="text-sm mt-2">Polub</p>
+                <div v-if="chat && chat.video && chat.video.chapters && chat.video.chapters[0] && chat.video.chapters[0].gameBoxArtUrl"
+                    class="flex mt-6 flex-row gap-2 justify-center text-white">
+                    <div class="flex flex-row items-center border border-neutral-800 rounded-xl overflow-hidden">
+                        <img :src="chat.video.chapters[0].gameBoxArtUrl">
+                        <p class="px-2">{{ chat.video.chapters[0].gameDisplayName }}</p>
+                    </div>
                 </div>
-                <transition name="slide-up">
-                    <div class="fixed py-2 bottom-10 px-2 z-30 w-screen left-0 flex justify-center" v-if="showModal">
-                        <div class="absolute -bottom-12 -rotate-6 px-2 z-20 w-screen flex justify-center">
-                            <p class="w-48 justify-end flex h-48 items-center serduszko mr-96">
-                                <Icon name="fluent-emoji-flat:red-heart" size="120px" class="text-purple-400" />
-                            </p>
-                        </div>
-                        <div class="absolute -bottom-12 rotate-6 px-2 z-20 w-screen flex justify-center">
-                            <p class="w-48 justify-start flex h-48 items-center serduszko ml-96">
-                                <Icon name="fluent-emoji-flat:red-heart" size="96px" class="text-purple-400" />
-                            </p>
-                        </div>
-                        <p
-                            class="text-white bg-neutral-800 z-30 rounded-xl px-4 py-2 border-t-neutral-600 border-b-neutrl-900 border border-transparent shadow-2xl shadow-red-900">
 
-                            {{
-                                modalMessage }}
-                        </p>
-                    </div>
-                </transition>
 
-                <a :href="'https://cdn1.fivecity.watch/test/' + chosenStreamer + '/' + chosenVideo + '.mp4'" download>
-                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-blue-400 transition 
-                outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,107,168,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                        <Icon name="material-symbols:download" size="32px" class="">
-                        </Icon>
-                        <p class="text-sm mt-2">Pobierz</p>
-                    </div>
-                </a>
-                <a href="https://twitter.com/archiwumwatch">
-                    <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-32 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-purple-400 transition 
-                outline-purple-900 hover:bg-purple-900 hover:bg-opacity-20 hover:border-purple-600
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(107,33,168,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                        <Icon name="material-symbols:auto-fix" size="32px" class="">
-                        </Icon>
-                        <p class="text-sm mt-2">Zgłoś poprawkę</p>
-                    </div>
-                </a>
-                <div @click="shareCurrentTime" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-green-400 transition 
-                outline-green-900 hover:bg-green-900 hover:bg-opacity-20 hover:border-green-600
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,107,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                    <Icon name="material-symbols:share" size="32px" class="">
-                    </Icon>
-                    <p class="text-sm mt-2">Udostępnij</p>
-                </div>
+
             </div>
 
 
@@ -464,5 +509,27 @@ onMounted(() => {
 .plyr__poster {
     filter: blur(10px) brightness(0.7);
     transform: scale(1.1);
+}
+
+.plyr {
+    transition: all 0.1s ease;
+}
+
+:root[data-theatre-mode="true"] .theatre-mode {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background-color: black;
+}
+
+:root[data-theatre-mode="true"] .theatre-mode .relative {
+    border-radius: 0px;
+}
+
+:root[data-theatre-mode="true"] .theatre-mode .scrollable-container {
+    display: block;
 }
 </style>
