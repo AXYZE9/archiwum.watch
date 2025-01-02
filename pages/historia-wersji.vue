@@ -3,17 +3,20 @@
         <h1 class="text-white text-bold text-2xl text-yellow-400">Historia wersji</h1>
         <div class="py-2">
             <h2 class="text-white text-bold">v3.0 (03.01.2025)</h2>
-            <p>✅ Przyspieszenie ładowania każdej podstrony przez odłożenie w czasie zapytań do serwera</p>
+            <p>✅ Znaczne przyspieszenie ładowania każdej podstrony przez odłożenie w czasie zapytań do serwera</p>
             <p>✅ Buforowanie w pamięci przeglądarki listy streamerów oraz ich VoDów</p>
             <p>✅ Filtrowanie po miesiącu i roku</p>
             <p>✅ Naprawiono problem z bardzo długimi ciągami znaków w czacie, które powodowały wychodzenie tekstu poza
                 obszar
                 czatu
             </p>
+            <p>✅ Możliwość usuwania filmów z ulubionych</p>
+            <p>✅ Nowy widok playera. Nowy wygląd, tryb kinowy</p>
+            <p>✅ Dodano "W tym dniu, we wcześniejszych latach" na stronie startowej</p>
 
-            <p>⌛ Miniatury po najechaniu na pasek postepu</p>
-            <p>⌛ Dodano "W tym dniu, we wcześniejszych latach" na stronie startowej</p>
-            <p>⌛ Nowy widok playera "Teatr", który optymalizuje oglądanie filmów z czatem</p>
+            <p>✅ Dodano historię oglądanych filmów</p>
+
+
 
         </div>
         <div class="py-2">

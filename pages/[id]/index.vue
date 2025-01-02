@@ -3,7 +3,7 @@ const route = useRoute();
 const chosenCreatorName = route.params.id;
 
 // Add caching to the fetch call
-const { data: chosenStreamerStreams, pending } = useFetch('https://cdn1.fivecity.watch/test/' + chosenCreatorName, {
+const { data: chosenStreamerStreams, pending } = useFetch('https://cdn1.fivecity.watch/test/' + chosenCreatorName + '/', {
     // Use unique key for each streamer
     key: `streamer-${chosenCreatorName}`,
     getCachedData: (key) => {
@@ -212,7 +212,7 @@ function previousPage() {
                     </div>
                     <img loading="lazy"
                         :src="'https://cdn1.fivecity.watch/test/' + chosenCreatorName + '/' + stream.name.slice(0, -4) + '.jpg'"
-                        :alt="'Screenshot' + stream.name.slice(0, -4)">
+                        :alt="'Screenshot' + stream.name.slice(0, -4)" style="width:100%;aspect-ratio: 16/9">
                     <div class="px-4 py-4">
 
                         <p class="font-bold text-yellow-400"> {{ stream.name.slice(7, 9) }}.{{

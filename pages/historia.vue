@@ -1,10 +1,8 @@
 <script setup>
+const watchedVideos = ref([]);
 
-const likedVideos = ref([]);
-
-// Interactive bubbles
+// Interactive bubbles (reused from ulubione.vue)
 const interactiveElement = ref(null);
-
 let x = ref(0);
 let y = ref(0);
 
@@ -18,9 +16,8 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-
 onMounted(() => {
-    likedVideos.value = loadLikedVideos();
+    watchedVideos.value = loadWatchedVideos();
     interactiveElement.value = document.querySelector(".interactive");
     window.addEventListener("mousemove", handleMouseMove);
     animate();
@@ -30,20 +27,33 @@ onBeforeUnmount(() => {
     window.removeEventListener("mousemove", handleMouseMove);
 });
 
-const loadLikedVideos = () => {
-    const storedVideos = localStorage.getItem('likedVideos');
+const loadWatchedVideos = () => {
+    const storedVideos = localStorage.getItem('watched-history');
     return storedVideos ? JSON.parse(storedVideos) : [];
 };
 
-const deleteFromLiked = (videoToDelete) => {
-    const videos = loadLikedVideos();
+const deleteFromHistory = (videoToDelete) => {
+    const videos = loadWatchedVideos();
     const filteredVideos = videos.filter(video =>
-        !(video.id === videoToDelete.id && video.name === videoToDelete.name)
+        !(video.id === videoToDelete.id && video.name === videoToDelete.name && video.timestamp === videoToDelete.timestamp)
     );
-    localStorage.setItem('likedVideos', JSON.stringify(filteredVideos));
-    likedVideos.value = filteredVideos;
+    localStorage.setItem('watched-history', JSON.stringify(filteredVideos));
+    watchedVideos.value = filteredVideos;
 };
 
+const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const options = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    };
+    const formatted = date.toLocaleDateString('pl-PL', options);
+    return formatted.replace(' r.', ''); // Remove "r." suffix that appears in Polish year
+};
 
 </script>
 
@@ -61,11 +71,11 @@ const deleteFromLiked = (videoToDelete) => {
         </div>
 
         <div class="text-white flex gap-6 flex-wrap justify-center mx-auto max-w-screen-xl">
-            <div v-if="likedVideos.length === 0" class="text-yellow-400 text-xl py-12 z-10 text-center">
-                Brak filmów w ulubionych 😔<br>Wróć na stronę główną i znajdź coś ciekawego!
+            <div v-if="watchedVideos.length === 0" class="text-yellow-400 text-xl py-12 z-10 text-center">
+                Jeżeli obejrzysz film przez minimum 10 sekund pojawi się on tutaj! ❤️<br>
             </div>
-            <div v-for='video in likedVideos' class="flex zoomOnHover relative" :key="video.id">
-                <button @click.prevent="deleteFromLiked(video)"
+            <div v-for='video in watchedVideos' class="flex zoomOnHover relative" :key="video.id + video.timestamp">
+                <button @click.prevent="deleteFromHistory(video)"
                     class="absolute top-2 right-2 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-1 rounded-lg transition-all duration-100 hover:scale-110 hover:shadow-[0px_0px_0px_1px_rgba(255,0,0,1)]">
                     🗑️
                 </button>
@@ -73,23 +83,19 @@ const deleteFromLiked = (videoToDelete) => {
                     shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0px_0px_70px_rgba(59,7,100,0.7)]
                     hover:border-yellow-400 hover:bg-stone-800 hover:shadow-yellow-900
                     transition overflow-hidden
-                    w-96 max-w-lg flex-grow videoAnimation
-        ">
+                    w-96 max-w-lg flex-grow videoAnimation">
                     <img loading="lazy"
                         :src="'https://cdn1.fivecity.watch/test/' + video.id + '/' + video.name + '.jpg'"
                         :alt="'Screenshot' + video.name" style="width:100%;aspect-ratio: 16/9">
                     <div class="px-4 py-4">
-
-                        <p class="font-bold text-yellow-400"> {{ video.name.slice(7, 9) }}.{{
+                        <p class="font-bold text-yellow-400">{{ video.name.slice(7, 9) }}.{{
                             video.name.slice(4, 6) }}.20{{ video.name.slice(1, 3) }}</p>
                         <p class="">{{ video.name.substring(11) }}</p>
+                        <p class="text-sm text-neutral-500 mt-2">Oglądano: {{ formatDate(video.timestamp) }}</p>
                     </div>
-
                 </nuxt-link>
-
             </div>
         </div>
-
     </div>
 </template>
 

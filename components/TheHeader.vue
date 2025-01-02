@@ -64,8 +64,11 @@ const generateUrlWithTimestamp = (baseUrl, timestamp) => {
                         class="text-black hover:text-yellow-800 transition">
                     </Icon>
                 </nuxt-link>
-                <Icon name="material-symbols:history" class="text-black hover:text-yellow-800 transition" size="28px">
-                </Icon>
+                <nuxt-link to="/historia">
+                    <Icon name="material-symbols:history" class="text-black hover:text-yellow-800 transition"
+                        size="28px">
+                    </Icon>
+                </nuxt-link>
             </div>
         </div>
 

@@ -6,7 +6,7 @@ const chosenVideo = route.params.name;
 // Remove await and handle loading state
 const { data: chat, pending: chatLoading } = useFetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + " - Chat.json", {
     key: `chat-${chosenStreamer}-${chosenVideo}`,
-    lazy: true, // This makes the fetch non-blocking
+    lazy: true,
 });
 
 const instance = getCurrentInstance()
@@ -26,6 +26,45 @@ const likedVideos = ref([]);
 // Save progress of movie
 const currentProgress = ref([]); // Array to store progress objects
 const router = useRouter();
+
+// Add history tracking
+const hasAddedToHistory = ref(false);
+const addToHistory = () => {
+    if (hasAddedToHistory.value) return;
+
+    const historyVideo = {
+        id: chosenStreamer,
+        name: chosenVideo,
+        timestamp: new Date().toISOString()
+    };
+
+    const storedHistory = localStorage.getItem('watched-history') || '[]';
+    const historyArray = JSON.parse(storedHistory);
+
+    // Remove duplicate if exists
+    const existingIndex = historyArray.findIndex(
+        video => video.id === historyVideo.id && video.name === historyVideo.name
+    );
+    if (existingIndex !== -1) {
+        historyArray.splice(existingIndex, 1);
+    }
+
+    // Add to beginning of array
+    historyArray.unshift(historyVideo);
+
+    // Keep only last 100 videos
+    if (historyArray.length > 100) {
+        historyArray.pop();
+    }
+
+    localStorage.setItem('watched-history', JSON.stringify(historyArray));
+    hasAddedToHistory.value = true;
+    console.log('✨ Dodano oglądany film do historii oglądania')
+};
+
+// Add timer to track watch time
+let watchTimer = null;
+
 const saveProgress = () => {
     const url = route.params.name
     const progress = { url, duration: duration.value };
@@ -79,16 +118,34 @@ onMounted(() => {
                 instance.refs.playerx.player.currentTime = duration.value;
             }
         }
+
+        // Start watch timer
+        watchTimer = setTimeout(() => {
+            addToHistory();
+        }, 10000); // 10 seconds
     });
 
     loadLikedVideos();
 
     window.onbeforeunload = (event) => {
         saveProgress();
+        if (watchTimer) {
+            clearTimeout(watchTimer);
+        }
         return null;
     };
+    const handleEscape = (event) => {
+        if (event.key === 'Escape' && isTheatreMode.value) {
+            isTheatreMode.value = false;
+        }
+    };
 
+    window.addEventListener('keydown', handleEscape);
 
+    // Clean up on unmount
+    onBeforeUnmount(() => {
+        window.removeEventListener('keydown', handleEscape);
+    });
 });
 
 onUpdated(scrollToBottom); // Scroll on content updates
@@ -96,13 +153,7 @@ onBeforeUnmount(saveProgress);
 
 function videoTimeUpdated() {
     playerx.value = instance.refs.playerx.player
-
     duration.value = playerx.value.currentTime
-    // console.log(duration.value)
-    // console.log(chat.value.comments)
-    // console.log("jazda")
-    // console.log(filteredComments)
-    // console.log("jazda2")
 }
 
 const filteredComments = computed(() => {
@@ -118,7 +169,6 @@ async function fetchChapters() {
         const response = await fetch('https://cdn1.fivecity.watch/test/' + chosenStreamer + "/" + chosenVideo + ".json");
         chapters.value = await response.json();
     } catch (error) {
-        console.error('Error fetching chapters:', error);
     }
 }
 
@@ -214,6 +264,9 @@ onMounted(() => {
 
     window.onbeforeunload = (event) => {
         saveProgress();
+        if (watchTimer) {
+            clearTimeout(watchTimer);
+        }
         return null;
     };
 });
@@ -266,7 +319,7 @@ watch(isTheatreMode, (newValue) => {
 
 
         <div class="theatre-mode flex flex-col md:flex-row md:items-center max-md:-ml-4 max-md:-mr-4">
-            <div class="relative md:rounded-2xl overflow-hidden">
+            <div class="relative md:rounded-2xl overflow-hidden flex w-full">
                 <vue-plyr @timeupdate="videoTimeUpdated" ref="playerx" class="z-20">
                     <video :emit="['timeupdate']" controls crossorigin playsinline
                         :data-poster="`https://cdn1.fivecity.watch/test/${chosenStreamer}/${chosenVideo}.jpg`">
@@ -278,7 +331,7 @@ watch(isTheatreMode, (newValue) => {
                     </video>
                 </vue-plyr>
                 <button v-if="isTheatreMode" @click="toggleTheatreMode"
-                    class="absolute md:fixed mt-2 md:top-0 right-2 z-[101] bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-1 rounded-lg transition-all duration-200 hover:scale-110 border-2 border-neutral-800">
+                    class="fixed mt-2 md:top-0 right-2 z-[101] bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-1 rounded-lg transition-all duration-200 hover:scale-110 border-2 border-neutral-800">
                     <Icon name="material-symbols:close" size="24px" />
                 </button>
             </div>
@@ -315,18 +368,15 @@ watch(isTheatreMode, (newValue) => {
         </div>
 
         <div
-            class="flex gap-3 md:gap-6 px-2 py-4 flex-grow-1 md:ml-2 justify-center flex-grow items-center flex-wrap md:flex-grow-0">
+            class="flex gap-3 px-2 py-4 flex-grow-1 md:ml-2 justify-center flex-grow items-center flex-wrap md:flex-grow-0">
 
-            <div @click="likeVideo" class="border-t border-neutral-700 bg-neutral-800 w-28 bg-opacity-10 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
+            <div @click="likeVideo" class="border-t p-4 border-neutral-700 bg-neutral-800 bg-opacity-30 rounded-xl
+                flex items-center justify-center text-neutral-600 hover:text-yellow-400 transition 
                 outline-yellow-900 hover:bg-yellow-900 hover:bg-opacity-20 hover:border-yellow-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
                 outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(255,215,0,0.2)]
-                hover:outline-1 cursor-pointer
-                ">
-                <Icon name="material-symbols:favorite" size="32px" class="">
-                </Icon>
-                <p class="text-sm mt-2">Polub</p>
+                hover:outline-1 cursor-pointer gap-2">
+                <Icon name="material-symbols:favorite" size="24px" />
             </div>
             <transition name="slide-up">
                 <div class="fixed py-2 bottom-10 px-2 z-30 w-screen left-0 flex justify-center" v-if="showModal">
@@ -350,45 +400,35 @@ watch(isTheatreMode, (newValue) => {
             </transition>
 
             <a :href="'https://cdn1.fivecity.watch/test/' + chosenStreamer + '/' + chosenVideo + '.mp4'" download>
-                <div class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-blue-400 transition 
-                outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
-                shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,107,168,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                    <Icon name="material-symbols:download" size="32px" class="">
-                    </Icon>
-                    <p class="text-sm mt-2">Pobierz</p>
+                <div class="border-t p-4 border-neutral-700 bg-neutral-800 bg-opacity-30 rounded-xl
+                    flex items-center justify-center text-neutral-600 hover:text-blue-400 transition 
+                    outline-blue-800 hover:bg-blue-900 hover:bg-opacity-20 hover:border-blue-500
+                    shadow-[0_6px_8px_rgba(0,0,0,0.2)]
+                    outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,107,168,0.4)]
+                    hover:outline-1 cursor-pointer gap-2">
+                    <Icon name="material-symbols:download" size="24px" />
                 </div>
             </a>
-            <div @click="shareCurrentTime" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-green-400 transition 
+            <div @click="shareCurrentTime" class="border-t p-4 border-neutral-700 bg-neutral-800 bg-opacity-30 rounded-xl
+                flex items-center justify-center text-neutral-600 hover:text-green-400 transition 
                 outline-green-900 hover:bg-green-900 hover:bg-opacity-20 hover:border-green-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
                 outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,107,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                <Icon name="material-symbols:share" size="32px" class="">
-                </Icon>
-                <p class="text-sm mt-2">Udostępnij</p>
+                hover:outline-1 cursor-pointer gap-2">
+                <Icon name="material-symbols:share" size="24px" />
             </div>
-            <div @click="toggleTheatreMode" class="border-t border-neutral-700 bg-neutral-800 bg-opacity-10 w-28 md:flex-grow=0 h-24 rounded-xl
-                flex flex-col items-center justify-center text-neutral-600 hover:text-teal-400 transition 
-                outline-teal-900 hover:bg-teal-900 hover:bg-opacity-20 hover:border-teal-600
+            <div @click="toggleTheatreMode" class="border-t p-4 border-neutral-700 bg-neutral-800 bg-opacity-30 rounded-xl
+                flex items-center justify-center text-neutral-600 hover:text-purple-400 transition 
+                outline-purple-900 hover:bg-purple-900 hover:bg-opacity-20 hover:border-purple-600
                 shadow-[0_6px_8px_rgba(0,0,0,0.2)]
-                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(33,168,158,0.4)]
-                hover:outline-1 cursor-pointer
-                ">
-                <Icon :name="isTheatreMode ? 'material-symbols:close-fullscreen' : 'material-symbols:open-in-full'"
-                    size="32px" class="">
-                </Icon>
-                <p class="text-sm mt-2">Tryb kinowy</p>
+                outline outline-0 hover:shadow-[0_6px_15px_rgba(0,0,0,0.7),inset_0px_0px_15px_rgba(147,51,234,0.4)]
+                hover:outline-1 cursor-pointer gap-2">
+                <p>Tryb kinowy</p>
             </div>
         </div>
 
         <div
-            class="flex bg-neutral-900 px-6 py-6 mt-6 rounded-2xl flex border-t border-neutral-800 shadow-xl flex-grow flex-wrap gap-6">
+            class="flex bg-neutral-900 bg-opacity-80 px-6 py-6 mt-6 rounded-2xl flex border-t border-neutral-800 shadow-xl flex-grow flex-wrap gap-6">
             <div class="flex items-center flex-grow flex-wrap justify-center">
                 <NuxtLink :to="' ../' + chosenStreamer"><img
                         :src='"https://cdn1.fivecity.watch/avatar/" + chosenStreamer + ".jpg"'
@@ -513,9 +553,13 @@ watch(isTheatreMode, (newValue) => {
 
 .plyr {
     transition: all 0.1s ease;
+    width: 100%;
+    aspect-ratio: 16/9;
 }
 
 :root[data-theatre-mode="true"] .theatre-mode {
+    margin-left: 0;
+    margin-right: 0;
     width: 100vw;
     height: 100vh;
     position: fixed;
