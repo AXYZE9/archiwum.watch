@@ -34,6 +34,39 @@ const { data: historicalVideos, pending: historicalPending } = useFetch('https:/
         localStorage.setItem('historicalVideos-cacheTime', Date.now().toString());
     }
 });
+
+const openFaqItems = ref(new Set());
+
+const toggleFaq = (index) => {
+    if (openFaqItems.value.has(index)) {
+        openFaqItems.value.delete(index);
+    } else {
+        openFaqItems.value.add(index);
+    }
+};
+
+const faqItems = [
+    {
+        question: '🤔 Co to za strona?',
+        answer: 'Archiwum.watch to projekt stworzony przez AXYZE, 0xA43, MrXylax oraz fs_animri mający na celu zachowanie historii serwerów GTA RP. Widzowie, streamerzy jak i gracze mogą powrócić do swoich wspomnień, przeżyć jeszcze raz emocjonujące chwile. 🥹 <br><br>Portal jest w charakterze non-profit i nie znajdują się na nim reklamy czy inne formy monetyzacji.'
+    },
+    {
+        question: '🔍 Ogólne funkcje',
+        answer: 'W nagłówku znajdziesz magiczną wyszukiwarkę, która pozwoli Ci znaleźć film klasycznie po tytule, ale także po słowach wypowiedzianych przez streamera. Po kliknięciu w takowy film przeglądarka automatycznie przekieruje Cię do odpowiedniego momentu wideo.'
+    },
+    {
+        question: '🎬 Strona z filmem',
+        answer: 'Na stronie odtwarzacza możesz go nie tylko odtworzyć, ale także pobrać na swoje urządzenie czy udostępnić link - inni wchodzący z Twojego linka oglądają od tego samego momentu! Okno z czatem możesz przemieszczać, zwiększać lub zmniejszać.<br><br>Tryb kinowy włącza specjalny, zoptymalizowany układ strony - jeżeli uważasz, że inny rozkład byłby jeszcze lepszy daj znać na naszym X/Twitterze! ❤️'
+    },
+    {
+        question: '❤️ Ulubione / Historia',
+        answer: 'W nagłówku znajdziesz serduszko, w którym znajdują się filmy, które dodano do ulubionych, a także historię oglądanych filmów. Ulubione oraz historia są przechowane lokalnie w Twojej przeglądarce bez angażowania serwera.<br><br>Filmy do ulubionych możesz dodać na stronie z odtwarzaczem, a w historii znajdziesz te które oglądano minimum 10 sekund.'
+    },
+    {
+        question: '✨ Napisy AI',
+        answer: 'Napisy zwiększają dostępność dla wielu osób, od tych uczących się języka polskiego po tych niedosłyszących. Niestety z powodu ogromu filmów dostępnych u nas oraz z racji, że jesteśmy projektem non-profit nie możemy pozwolić sobie na ręczne przygotowanie napisów. <br><br>Z powyższych powodów wykorzystujemy AI do wygenerowania napisów. Nonstop próbujemy poprawiać jakość napisów AI, dlatego najnowsze filmy będą miały precyzyjniejsze napisy, niż te poprzednie.'
+    },
+];
 </script>
 
 <template>
@@ -52,13 +85,13 @@ const { data: historicalVideos, pending: historicalPending } = useFetch('https:/
             </div>
         </div>
 
-        <div v-else class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap underline card-container">
+        <div v-else
+            class="flex my-16 gap-6 md:gap-12 px-2 justify-center flex-wrap underline card-container max-w-screen-xl mx-auto">
             <div class="flex card-effect" v-for="streamer in streamerList">
                 <nuxt-link :to='streamer.name'>
                     <div class="" @click='chosenStreamer = streamer.name'>
-                        <img :src='"https://cdn1.fivecity.watch/avatar/" + streamer.name + ".jpg"'
-                            class="w-40 h-40 md:w-48 md:h-48">
-                        <p class="absolute font-bold text-xl md:text-2xl z-10 text-white"
+                        <img :src='"https://cdn1.fivecity.watch/avatar/" + streamer.name + ".jpg"' class="w-40 h-40">
+                        <p class="absolute font-bold text-xl z-10 text-white"
                             style="bottom: 0px; left: 50%; transform: translate(-50%, -50%);">
                             {{ streamer.name }}</p>
                     </div>
@@ -105,16 +138,42 @@ const { data: historicalVideos, pending: historicalPending } = useFetch('https:/
                                 :src="'https://cdn1.fivecity.watch/test/' + video.streamer + '/' + video.video.slice(0, -4) + '.jpg'"
                                 :alt="'Screenshot ' + video.video.slice(0, -4)" style="width:100%;aspect-ratio: 16/9">
                             <div class="px-4 py-4">
-                                <div class="flex justify-between items-center">
-                                    <p class="font-bold text-yellow-400">{{ new Date(video.timestamp).getFullYear() }}
+                                <div>
+                                    <p class="font-bold text-yellow-400 inline-block">{{ new
+                                        Date(video.timestamp).getFullYear() }}
                                     </p>
-                                    <p class="text-neutral-400">{{ video.streamer }}</p>
+                                    <p class="text-yellow-400 inline-block ml-1">{{ video.streamer }}</p>
                                 </div>
                                 <p class="text-white">{{ video.video.substring(video.video.indexOf('- ') + 1).slice(0,
                                     -4)
                                     }}</p>
                             </div>
                         </nuxt-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-neutral-950 py-12 px-4 md:px-8">
+            <div id="faq" class="max-w-3xl mx-auto space-y-4">
+                <h2 class="text-xl md:text-2xl font-bold text-yellow-400 text-center mb-8">Więcej o Archiwum.watch</h2>
+                <div v-for="(item, index) in faqItems" :key="index"
+                    class="bg-neutral-900/40 rounded-lg border border-neutral-900 shadow-[0px_1px_0px_inset_rgba(250,255,255,0.1)] overflow-hidden transition-all duration-300 hover:border-yellow-400/50">
+                    <button @click="toggleFaq(index)"
+                        class="w-full px-6 py-4 flex justify-between items-center text-left">
+                        <span class="text-lg text-white">{{ item.question }}</span>
+                        <span class="transform transition-transform duration-300 ease-in-out"
+                            :class="{ 'rotate-45': openFaqItems.has(index) }">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="overflow-hidden transition-all duration-300 ease-in-out"
+                        :style="{ maxHeight: openFaqItems.has(index) ? '1000px' : '0px' }">
+                        <div class="px-6 pb-4 text-neutral-300" v-html="item.answer">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -250,5 +309,23 @@ const { data: historicalVideos, pending: historicalPending } = useFetch('https:/
     50% {
         opacity: .5;
     }
+}
+
+/* FAQ Animations */
+.faq-enter-active,
+.faq-leave-active {
+    transition: all 0.3s ease-out;
+}
+
+.faq-enter-from,
+.faq-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Enhanced FAQ item hover effect */
+.bg-neutral-900\/50:hover {
+    background-color: rgba(23, 23, 23, 0.7);
+    transition: all 0.3s ease-in-out;
 }
 </style>
