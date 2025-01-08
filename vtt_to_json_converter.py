@@ -102,6 +102,6 @@ def convert_vtt_to_json(input_folder, output_folder, max_file_size_mb):
 
 # Usage
 input_folder = '.'  # Current directory
-output_folder = './output_json'  # Output folder for JSON files
+output_folder = '.'  # Output folder for JSON files
 max_file_size_mb = 100  # Maximum file size in MB
 convert_vtt_to_json(input_folder, output_folder, max_file_size_mb)
